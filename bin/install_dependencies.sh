@@ -10,9 +10,10 @@ ret=0
 which pip3 2>&1 > /dev/null ; ret=$?
 
 if [ ! "$ret" = "0" ]; then
+    echo ""
     echo "install pip3"
     ret=0    
-    echo "$password" | sudo -S apt install python3-pip ; ret=$?
+    echo "$password" | sudo -S apt -y install python3-pip ; ret=$?
     if [ ! "$ret" = 0 ]; then
         echo "installation Failed!"
     else
