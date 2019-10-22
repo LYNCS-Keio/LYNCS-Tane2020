@@ -1,4 +1,5 @@
 # LYNCS-Tane2020
+[![Build Status](https://travis-ci.org/LYNCS-Keio/LYNCS-Tane2020.svg?branch=master)](https://travis-ci.org/LYNCS-Keio/LYNCS-Tane2020)
 
 2020種子島宇宙ロケットコンテストヘ向けたローバーのプログラム
 
