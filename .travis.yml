@@ -1,0 +1,7 @@
+language: python
+install:
+  - pip3 install pipenv
+  - pipenv install
+script:
+  - cd raspberry_pi
+  - python3 -m unittest discover -s tests -p "*_test.py"
