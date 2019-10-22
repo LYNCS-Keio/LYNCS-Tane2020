@@ -1,16 +1,15 @@
 import pigpio
 
 ADDR = 0x77
-pi = pigpio.pigpio()
+pi = pigpio.pi()
 
 try:
     bus = pi.i2c_open(1, 0x77)
-except:
-    print("Opening Error")
-finally:
-    
+    ret = pi.i2c_read_byte_data(bus, 0x0D)
+    print(bin(ret))
 
-try:
+except:
+    print("Error Opening File")
 
 finally:
     pi.i2c_close(bus)
