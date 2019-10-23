@@ -104,7 +104,7 @@ def setup():
     time.sleep(1)
 
 setup()
-bus.readByte(0x77)
+read_dps310()
 
 if __name__ == "__main__":
     try:
