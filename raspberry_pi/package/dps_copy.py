@@ -109,7 +109,7 @@ bus.readByte(0x77)
 if __name__ == "__main__":
     try:
         while True:
-            print(bus.readByte(0x77))
+            print(read_dps310())
             time.sleep(0.01)
 
     except KeyboardInterrupt:
