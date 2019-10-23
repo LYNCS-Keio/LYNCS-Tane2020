@@ -72,3 +72,6 @@ class i2c_bus():
             except I2C_FAILED_WRITING:
                 raise I2C_FAILED_WRITING
 
+    def __del__(self):
+        self.pi.i2c_close(self.bus)
+
