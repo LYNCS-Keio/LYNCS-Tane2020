@@ -93,14 +93,14 @@ def read_dps310():
 
 def setup():
     # オーバーサンプリング 64time
-    bus.write_byte_data(address_dps310, 0x06, 0x26)
+    bus.writeByte(address_dps310, 0x06, 0x26)
     time.sleep(1)
-    bus.write_byte_data(address_dps310, 0x07, 0xA6)
+    bus.writeByte(address_dps310, 0x07, 0xA6)
     time.sleep(1)
-    bus.write_byte_data(address_dps310, 0x08, 0x07)
+    bus.writeByte(address_dps310, 0x08, 0x07)
     time.sleep(1)
     # コンフィグ(オーバーサンプリングを可能に)
-    bus.write_byte_data(address_dps310, 0x09, 0x0C)
+    bus.writeByte(address_dps310, 0x09, 0x0C)
     time.sleep(1)
 
 setup()
