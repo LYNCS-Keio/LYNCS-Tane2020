@@ -1,4 +1,4 @@
-from ../lib import i2c_bus
+from lib import i2c_bus
 import pigpio
 import time
 import datetime
@@ -9,9 +9,9 @@ bus = i2c_bus.i2c_bus(pi, address_dps310)
 
 def read_dps310():
     # 気圧
-    p1 = bus.read_byte_data(address_dps310, 0x00)
-    p2 = bus.read_byte_data(address_dps310, 0x01)
-    p3 = bus.read_byte_data(address_dps310, 0x02)
+    p1 = bus.readByte(0x00)
+    p2 = bus.readByte(0x01)
+    p3 = bus.readByte(0x02)
     p = p1
     p = p<<8
     p = p | p2
@@ -20,9 +20,9 @@ def read_dps310():
     if p & (1<<23):
         p = p - (1<<24)
     # 温度
-    t1 = bus.read_byte_data(address_dps310, 0x03)
-    t2 = bus.read_byte_data(address_dps310, 0x04)
-    t3 = bus.read_byte_data(address_dps310, 0x05)
+    t1 = bus.readByte(0x03)
+    t2 = bus.readByte(0x04)
+    t3 = bus.readByte(0x05)
     t = t1
     t = t<<8
     t = t | t2
@@ -32,21 +32,21 @@ def read_dps310():
         t = t - (1<<24)
     p_raw_sc = p / 1040384
     t_raw_sc = t / 1040384
-    source13 = bus.read_byte_data(address_dps310, 0x13)
-    source14 = bus.read_byte_data(address_dps310, 0x14)
-    source15 = bus.read_byte_data(address_dps310, 0x15)
-    source16 = bus.read_byte_data(address_dps310, 0x16)
-    source17 = bus.read_byte_data(address_dps310, 0x17)
-    source18 = bus.read_byte_data(address_dps310, 0x18)
-    source19 = bus.read_byte_data(address_dps310, 0x19)
-    source1A = bus.read_byte_data(address_dps310, 0x1A)
-    source1B = bus.read_byte_data(address_dps310, 0x1B)
-    source1C = bus.read_byte_data(address_dps310, 0x1C)
-    source1D = bus.read_byte_data(address_dps310, 0x1D)
-    source1E = bus.read_byte_data(address_dps310, 0x1E)
-    source1F = bus.read_byte_data(address_dps310, 0x1F)
-    source20 = bus.read_byte_data(address_dps310, 0x20)
-    source21 = bus.read_byte_data(address_dps310, 0x21)
+    source13 = bus.readByte(0x13)
+    source14 = bus.readByte(0x14)
+    source15 = bus.readByte(0x15)
+    source16 = bus.readByte(0x16)
+    source17 = bus.readByte(0x17)
+    source18 = bus.readByte(0x18)
+    source19 = bus.readByte(0x19)
+    source1A = bus.readByte(0x1A)
+    source1B = bus.readByte(0x1B)
+    source1C = bus.readByte(0x1C)
+    source1D = bus.readByte(0x1D)
+    source1E = bus.readByte(0x1E)
+    source1F = bus.readByte(0x1F)
+    source20 = bus.readByte(0x20)
+    source21 = bus.readByte(0x21)
     c00 = source13
     c00 = c00<<8
     c00 = c00 | source14
@@ -93,23 +93,23 @@ def read_dps310():
 
 def setup():
     # オーバーサンプリング 64time
-    bus.write_byte_data(address_dps310, 0x06, 0x26)
+    bus.writeByte(0x06, 0x26)
     time.sleep(1)
-    bus.write_byte_data(address_dps310, 0x07, 0xA6)
+    bus.writeByte(0x07, 0xA6)
     time.sleep(1)
-    bus.write_byte_data(address_dps310, 0x08, 0x07)
+    bus.writeByte(0x08, 0x07)
     time.sleep(1)
     # コンフィグ(オーバーサンプリングを可能に)
-    bus.write_byte_data(address_dps310, 0x09, 0x0C)
+    bus.writeByte(0x09, 0x0C)
     time.sleep(1)
 
 setup()
-bus.readByte(0x77)
+read_dps310()
 
 if __name__ == "__main__":
     try:
         while True:
-            print(bus.readByte(0x77))
+            print(read_dps310())
             time.sleep(0.01)
 
     except KeyboardInterrupt:
