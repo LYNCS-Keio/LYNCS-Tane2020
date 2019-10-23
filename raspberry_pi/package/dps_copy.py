@@ -1,4 +1,5 @@
 from lib import i2c_bus
+import smbus
 import pigpio
 import time
 import datetime
@@ -6,6 +7,7 @@ import datetime
 address_dps310 = 0x77
 pi = pigpio.pi()
 bus = i2c_bus.i2c_bus(pi, address_dps310)
+smbs = smbus.SMBus(1)
 
 def read_dps310():
     # 気圧
@@ -93,14 +95,14 @@ def read_dps310():
 
 def setup():
     # オーバーサンプリング 64time
-    bus.writeByte(address_dps310, 0x06, 0x26)
+    smbs.write_byte_data(address_dps310, 0x06, 0x26)
     time.sleep(1)
-    bus.writeByte(address_dps310, 0x07, 0xA6)
+    smbs.write_byte_data(address_dps310, 0x07, 0xA6)
     time.sleep(1)
-    bus.writeByte(address_dps310, 0x08, 0x07)
+    smbs.write_byte_data(address_dps310, 0x08, 0x07)
     time.sleep(1)
     # コンフィグ(オーバーサンプリングを可能に)
-    bus.writeByte(address_dps310, 0x09, 0x0C)
+    smbs.write_byte_data(address_dps310, 0x09, 0x0C)
     time.sleep(1)
 
 setup()
