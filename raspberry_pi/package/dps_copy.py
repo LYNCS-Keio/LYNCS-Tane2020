@@ -1,4 +1,4 @@
-from ../lib import i2c_bus
+from lib import i2c_bus
 import pigpio
 import time
 import datetime
