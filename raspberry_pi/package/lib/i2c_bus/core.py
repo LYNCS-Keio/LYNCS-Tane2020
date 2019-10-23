@@ -16,10 +16,11 @@ class I2C_FAILED_WRITING(I2C_ERROR):
     "Failed writing on the device"
 
 
-class bus():
+class i2c_bus():
     def __init__(self, handler, addr):
         self.pi = handler
         self.addr = addr
+        print("HELLO")
         try:
             self.bus = self.pi.i2c_open(1, self.addr)
         except TypeError:
