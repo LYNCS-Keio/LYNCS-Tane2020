@@ -1,4 +1,6 @@
-from lib import i2c_bus
+import sys, pathlib
+sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
+import i2c_bus
 import pigpio
 import time
 import datetime
