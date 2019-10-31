@@ -11,7 +11,7 @@ class opMode(IntEnum):
 
 class config_registers():
     TMP_CONF        = (0x07, 0x77, 0)
-    PM_CONF         = (0x06, 0x77, 0) 
+    PRS_CONF         = (0x06, 0x77, 0) 
     MEAS_CTRL       = (0x08, 0x07, 0)
     FIFO_EN         = (0x09, 0x02, 1)
     TEMP_RDY        = (0x08, 0x20, 5)
