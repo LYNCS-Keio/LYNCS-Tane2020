@@ -51,7 +51,7 @@ class dps310(opMode):
 
     def config_Pressure(self, rate, prc):
         try:
-            self.bus.writeByteBitfield(config_registers.PM_RATE[0], config_registers.PM_RATE[1], config_registers.PM_RATE[2], rate << 4 | prc)
+            self.bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | prc)
         except:
             self.state = opMode.ERR
             raise i2c_bus.I2C_FAILED_WRITING
@@ -60,15 +60,30 @@ class dps310(opMode):
             self.p_rate = rate
             try:
                 if prc > measurement_rate.MEAS_RATE_8:
-                    pass
+                    self.bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 1)
                 else:
-                    pass
+                    self.bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 0)                    
             except:
                 self.state = opMode.ERR
                 raise i2c_bus.I2C_FAILED_WRITING
 
     def config_Temperature(self):
-        pass
+        try:
+            self.bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | prc)
+        except:
+            self.state = opMode.ERR
+            raise i2c_bus.I2C_FAILED_WRITING
+        else:
+            self.t_prc = prc
+            self.t_rate = rate
+            try:
+                if prc > measurement_rate.MEAS_RATE_8:
+                    self.bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 1)
+                else:
+                    self.bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 0)                    
+            except:
+                self.state = opMode.ERR
+                raise i2c_bus.I2C_FAILED_WRITING
 
     def read_Pressure(self):
         pass
