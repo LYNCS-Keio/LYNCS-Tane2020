@@ -6,7 +6,7 @@ class _I2C_ERROR(Exception):
     "i2c_bus base error"
 
 class I2C_FAILED(_I2C_ERROR):
-    "Something went wrong"
+    "Something went wrong on i2c_bus"
 
 class I2C_FAILED_OPEN(_I2C_ERROR):
     "Failed Opening bus error"
