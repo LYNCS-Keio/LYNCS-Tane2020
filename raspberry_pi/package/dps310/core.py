@@ -1,43 +1,57 @@
 import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
-import i2c_bus
 import pigpio
-from consts import opMode, config_registers, registers, measurement_rate
+from i2c_bus import *
+from consts import *
 
 
-class dps310(opMode):
+class dps310():
     def __init__(self, handler, addr):
         self.addr = addr
-        self.p_prc = None; self.p_rate = None; self.t_prc = None; self.t_rate = None
-        
+        self.p_osr = None; self.p_rate = None; self.t_osr = None; self.t_rate = None; self.Traw_sc_pre = None
+
         try:
-            self.bus = i2c_bus.i2c_bus(handler, self.addr)
+            self.__bus = i2c_bus(handler, self.addr)
         except:
             self.state = opMode.ERR
-            raise TypeError
+            raise DPS_FAILED_INIT
         else:
             self.state = opMode.IDLE
+
+    def setup(self, mode, p_rate, p_osr, t_rate, t_osr):
+        try:
+            self.set_OpMode(mode)
+        except:
+            raise DPS_FAILED_SETUP
+        try:
+            self.config_Pressure(p_rate, p_osr)
+        except:
+            raise DPS_FAILED_SETUP
+        try:
+            self.config_Temperature(t_rate, t_osr)
+        except:
+            raise DPS_FAILED_SETUP
 
     def convert_complement(self, data, bits):
         if (data & (1 << (bits -1))):
             data = -(~(data - 1) & (1 << bits) -1)
         return data
-        
+
     def set_OpMode(self, mode):
         try:
-            self.bus.writeByteBitfield(config_register.MSR_CTRL[0], config_register.MSR_CTRL[1], config_register[2], mode)
+            self.__bus.writeByteBitfield(config_register.MSR_CTRL[0], config_register.MSR_CTRL[1], config_register[2], mode)
         except:
             self.state = opMode.ERR
-            raise i2c_bus.I2C_FAILED_WRITING
+            raise DPS_FAILED_WRITING
         else:
             self.state = mode
 
     def get_coeffs(self):
         try:
-            buf = self.bus.readBytes(0x10, 18)
+            buf = self.__bus.readBytes(data_registers.COEFFS[0], data_registers.COEFFS[1])
         except:
             self.state = opMode.ERR
-            raise i2c_bus.I2C_FAILED_READING
+            raise DPS_FAILED_READING
         else:
             self.c0  = self.convert_complement(buf[0] << 4 | buf[1] >> 4, 12)
             self.c1  = self.convert_complement((buf[1] & 0x0F) << 8 | buf[2], 12)
@@ -49,44 +63,72 @@ class dps310(opMode):
             self.c21 = self.convert_complement(buf[14] << 8 | buf[15], 16)
             self.c30 = self.convert_complement(buf[16] << 8 | buf[17], 16)
 
-    def config_Pressure(self, rate, prc):
+    def config_Pressure(self, rate, osr):
         try:
-            self.bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | prc)
+            self.__bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | osr)
         except:
             self.state = opMode.ERR
-            raise i2c_bus.I2C_FAILED_WRITING
+            raise DPS_FAILED_WRITING
         else:
-            self.p_prc = prc
+            self.p_osr = osr
             self.p_rate = rate
             try:
-                if prc > measurement_rate.MEAS_RATE_8:
-                    self.bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 1)
+                if osr > measurement_conf.MEAS_RATE_8:
+                    self.__bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 1)
                 else:
-                    self.bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 0)                    
+                    self.__bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 0)
             except:
                 self.state = opMode.ERR
-                raise i2c_bus.I2C_FAILED_WRITING
+                raise DPS_FAILED_WRITING
 
-    def config_Temperature(self):
+    def config_Temperature(self, rate, osr):
         try:
-            self.bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | prc)
+            self.__bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | osr)
         except:
             self.state = opMode.ERR
-            raise i2c_bus.I2C_FAILED_WRITING
+            raise DPS_FAILED_WRITING
         else:
-            self.t_prc = prc
+            self.t_osr = osr
             self.t_rate = rate
             try:
-                if prc > measurement_rate.MEAS_RATE_8:
-                    self.bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 1)
+                if osr > measurement_conf.MEAS_RATE_8:
+                    self.__bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 1)
                 else:
-                    self.bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 0)                    
+                    self.__bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 0)
             except:
                 self.state = opMode.ERR
-                raise i2c_bus.I2C_FAILED_WRITING
+                raise DPS_FAILED_WRITING
 
     def read_Pressure(self):
-        pass
+        if ((self.state == opMode.CONT_PRS) or (self.state == opMode.CONT_BOTH)) and self.Traw_sc_pre != None:
+            try:
+                buf = self.__bus.readBytes(data_registers.PRS[0], data_registers.PRS[1])
+            except:
+                raise DPS_FAILED_READING
+            else:
+                calc_prs = lambda x: (x**3)*self.c30 + (x**2)*(self.c20 + self.Traw_sc_pre*self.c21) + \
+                    x*(self.c10 + self.Traw_sc_pre*self.c11) + self.Traw_sc_pre*self.c01 + self.c00
+
+                raw = self.convert_complement(buf[0] << 16 | buf[1] << 8 | buf[2], 24)
+                return calc_prs(raw / scale_factor.scale_factors[self.p_osr])
+        else:
+            raise DPS_STATUS_ERROR
 
     def read_Temperature(self):
-        pass
+        if (self.state == opMode.CONT_TMP) or (self.state == opMode.CONT_BOTH):
+            try:
+                buf = self.__bus.readBytes(data_registers.TMP[0], data_registers.TMP[1])
+            except:
+                raise DPS_FAILED_READING
+            else:
+                calc_tmp = lambda x: self.c0*0.5 + self.c1*x
+                raw = self.convert_complement(buf[0] << 16 | buf[1] << 8 | buf[2], 24)
+                self.Traw_sc_pre = raw / scale_factor.scale_factors[self.t_osr]
+                return calc_tmp(self.Traw_sc_pre)
+        else:
+            raise DPS_STATUS_ERROR
+
+
+    if __name__ == "__main__":
+        pi = pigpio.pi()
+        dps = dps310(pi, 0x77)
