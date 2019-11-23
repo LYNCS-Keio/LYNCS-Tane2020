@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+echo -n "user :"
+read -s user
 echo -n "password : "
 read -s password
 
@@ -61,15 +63,15 @@ if [ ! "$ret" = "0" ]; then
     echo "install pyenv"
     echo "Download pyenv..."
     ret=0
-    echo "$password" | sudo -S git clone https://github.com/pyenv/pyenv.git ~/.pyenv ; ret=$?
+    echo "$password" | sudo -S git clone https://github.com/pyenv/pyenv.git /home/"$user"/.pyenv ; ret=$?
 
     if [ ! "$ret" = 0 ]; then
         echo "Download Failed!"
     else
         echo "Download Success"
-        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.profile
-        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.profile
-        echo 'eval "$(pyenv init -)"' >> ~/.profile
+        echo export PYENV_ROOT=/home/$user/.pyenv >> /home/"$user"/.profile
+        echo export PATH=$PYENV_ROOT/bin:$PATH >> /home/"$user"/.profile
+        echo eval "$(pyenv init -)" >> /home/"$user"/.profile
         echo "pyenv installed!"
     fi
 
