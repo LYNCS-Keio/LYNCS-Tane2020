@@ -2,6 +2,7 @@ import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
 import pigpio
 from i2c_bus import *
+from enum import IntEnum, Enum
 
 class _DPS_ERROR(Exception):
     "dps310 base error"
@@ -24,7 +25,7 @@ class DPS_FAILED_WRITING(_DPS_ERROR):
 class DPS_STATUS_ERROR(_DPS_ERROR):
     "Status of dps310 is invalid"
 
-class opMode(IntEnum):
+class opMode():
     IDLE            = 0x00
     CMD_PRS         = 0x01
     CMD_TEMP        = 0x02
@@ -57,7 +58,7 @@ class registers():
     INT_HL          = (0x09, 0x80, 7)
     INT_SEL         = (0x09, 0x70, 4)
 
-class measurement_conf(IntEnum):
+class measurement_conf():
     MEAS_RATE_1     = 0
     MEAS_RATE_2     = 1
     MEAS_RATE_4     = 2
@@ -110,7 +111,7 @@ class dps310():
 
     def set_OpMode(self, mode):
         try:
-            self.__bus.writeByteBitfield(config_register.MEAS_CTRL[0], config_register.MEAS_CTRL[1], config_register.MEAS_CTRL[2], mode)
+            self.__bus.writeByteBitfield(config_registers.MEAS_CTRL[0], config_registers.MEAS_CTRL[1], config_registers.MEAS_CTRL[2], mode)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_WRITING
