@@ -39,7 +39,7 @@ class dps310():
 
     def set_OpMode(self, mode):
         try:
-            self.__bus.writeByteBitfield(config_register.MSR_CTRL[0], config_register.MSR_CTRL[1], config_register[2], mode)
+            self.__bus.writeByteBitfield(config_register.MEAS_CTRL[0], config_register.MEAS_CTRL[1], config_register.MEAS_CTRL[2], mode)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_WRITING
