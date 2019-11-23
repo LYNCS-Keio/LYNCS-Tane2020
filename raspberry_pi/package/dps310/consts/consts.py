@@ -1,4 +1,4 @@
-from enum import IntEnum, auto
+from enum import IntEnum
 
 __all__ = ['DPS_FAILED', 'DPS_FAILED_INIT', 'DPS_FAILED_SETUP', 'DPS_FAILED_READING', 'DPS_FAILED_WRITING', 'DPS_STATUS_ERROR', 'opMode', 'config_registers', 'registers', 'measurement_conf', 'data_registers']
 
@@ -58,13 +58,13 @@ class registers():
 
 class measurement_conf(IntEnum):
     MEAS_RATE_1     = 0
-    MEAS_RATE_2     = auto()
-    MEAS_RATE_4     = auto()
-    MEAS_RATE_8     = auto()
-    MEAS_RATE_16    = auto()
-    MEAS_RATE_32    = auto()
-    MEAS_RATE_64    = auto()
-    MEAS_RATE_128   = auto()
+    MEAS_RATE_2     = 1
+    MEAS_RATE_4     = 2
+    MEAS_RATE_8     = 3
+    MEAS_RATE_16    = 4
+    MEAS_RATE_32    = 5
+    MEAS_RATE_64    = 6
+    MEAS_RATE_128   = 7
 
 class data_registers():
     PRS             = (0x00, 3)
