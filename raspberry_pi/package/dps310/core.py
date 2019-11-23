@@ -202,10 +202,15 @@ class dps310():
 
 
 if __name__ == "__main__":
+    import time
     pi = pigpio.pi()
     dps = dps310(pi, 0x77)
-    dps.set_OpMode(opMode.CONT_BOTH)
+    dps.set_OpMode(opMode.IDLE)
+    dps.get_coeffs()
     dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
-    dps.config_Temperature(measurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16)
-    print(dps.read_Temperature())
-    print(dps.read_Pressure())
+    dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
+    dps.set_OpMode(opMode.CONT_BOTH)
+    while True:
+        time.sleep(0.01)
+        print(dps.read_Temperature())
+        #print(dps.read_Pressure())
