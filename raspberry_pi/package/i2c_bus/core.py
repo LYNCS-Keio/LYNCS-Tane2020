@@ -51,11 +51,15 @@ class i2c_bus():
 
     def readBytes(self, reg, length):
         try:
-            val = self.pi.i2c_read_i2c_block_data(self.bus, reg, length)
+            (ret, val) = self.pi.i2c_read_i2c_block_data(self.bus, reg, length)
+            if ret >= 0:
+                int_val = [x for x in val]
+            else:
+                raise I2C_FAILED_READING
         except:
             raise I2C_FAILED_READING
         else:
-            return val
+            return int_val
 
     def writeByte(self, reg, data):
         try:
