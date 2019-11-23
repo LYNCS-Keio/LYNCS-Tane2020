@@ -206,4 +206,6 @@ if __name__ == "__main__":
     dps = dps310(pi, 0x77)
     dps.set_OpMode(opMode.CONT_BOTH)
     dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
+    dps.config_Temperature(measurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16)
+    print(dps.read_Temperature())
     print(dps.read_Pressure())
