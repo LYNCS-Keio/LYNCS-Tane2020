@@ -129,6 +129,6 @@ class dps310():
             raise DPS_STATUS_ERROR
 
 
-    if __name__ == "__main__":
-        pi = pigpio.pi()
-        dps = dps310(pi, 0x77)
+if __name__ == "__main__":
+    pi = pigpio.pi()
+    dps = dps310(pi, 0x77)
