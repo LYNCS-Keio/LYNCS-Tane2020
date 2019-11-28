@@ -20,7 +20,8 @@ with open(current_dir + '/' + filename + '.csv', 'w') as c:
     wri = csv.writer(c, lineterminator='\n')
     while True:
         position = gps.lat_long_measurement()
-        distance = ((poion[0] - sys.argv[1])**2 + (position[1] - sys.argv[2])**2)**0.5
+        distance = ((position[0] - float(sys.argv[1]))**2 + (position[1] - float(sys.argv[2]))**2)**0.5
         pos = [position, distance]
         wri.writerow(pos)
+        print(pos)
         time.sleep(1)
