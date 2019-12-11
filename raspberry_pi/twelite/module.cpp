@@ -4,7 +4,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(twelite, t) {
-    py::module m("twe_", "pybind11 plugin");
+    py::module m("twe_twe", "pybind11 plugin");
     py::class_<TWE_Lite>(t, "twe_lite")
         .def(py::init())
         .def("send_simple", &TWE_Lite::send_simple)
