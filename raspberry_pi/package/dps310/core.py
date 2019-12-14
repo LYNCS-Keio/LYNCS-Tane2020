@@ -212,5 +212,6 @@ if __name__ == "__main__":
     dps.set_OpMode(opMode.CONT_BOTH)
     while True:
         time.sleep(0.01)
-        print(dps.read_Temperature())
-        #print(dps.read_Pressure())
+        print(dps.read_Temperature(), end="")
+        print(", ", end="")
+        print(dps.read_Pressure())
