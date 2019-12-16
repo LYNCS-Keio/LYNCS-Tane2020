@@ -48,8 +48,8 @@ public:
 			// 特にやることなし(そもそもデストラクタが呼ばれるべきではない)
 		#elif defined(RASPBERRY_PI)
 			if(fd != 0){
-				serialFlush(fd);
-				serialClose(fd);
+				serialFlush(fd);	
+			        serialClose(fd);
 			}
 		#else
 			close(fd);

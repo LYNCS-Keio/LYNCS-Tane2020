@@ -1,10 +1,12 @@
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <iostream>
 #define RASPBERRY_PI
 #include "twelite.hpp"
 
 TWE_Lite twelite("/dev/ttyS0", 115200);
 
-int send_recv(int argc, char **argv){
+int send_recv(){
 	twelite.init();
 
 	uint8_t buf[] = { 'A', 'B' };

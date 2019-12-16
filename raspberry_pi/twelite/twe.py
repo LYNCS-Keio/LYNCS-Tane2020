@@ -1,3 +1,3 @@
-import twelite_module
+import send_recv
 
 help(send_recv)
