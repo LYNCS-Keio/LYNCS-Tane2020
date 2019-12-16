@@ -57,9 +57,14 @@ def lat_long_measurement(pi, pin):
     """
     s = pi.bb_serial_read_open(pin, 9600, 8)
     while True:
-        se = pi.bb_serial_read(pin)[1]
-        #print(se)
-        sentence = se
+        count = 1
+        while count: # read echoed serial data
+            (count, data) = pi.bb_serial_read(RX)
+            if count:
+            sentence += data
+            lt += count
+            time.sleep(0.1)
+        print(sentence)
         if sentence[3:6] == 'GGA' or sentence[3:6] == 'RMC' or sentence[
                 3:6] == 'GLL':
             lat_and_long = lat_long_reader(sentence)
