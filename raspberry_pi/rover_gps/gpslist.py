@@ -20,6 +20,7 @@ def get_lat_long(pin):
     results.append(position[1])
     results.append(distance)
     lock.release()
+    print(threading.current_thread().name)
     
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +42,7 @@ with open(current_dir + '/' + filename + '.csv', 'w') as c:
         thread_2.start()
         thread_1.join()
         thread_2.join()
+        print(results)
         wri.writerow(results)
 
 pi.stop()
