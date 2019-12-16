@@ -5,4 +5,4 @@ set(PYBIND11_CPP_STANDARD -std=c++14)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -O2")
 add_subdirectory(pybind11)
 
-pybind11_add_module(twelite_module SHARED send_recv.cpp)
+pybind11_add_module(send_recv SHARED send_recv.cpp)
