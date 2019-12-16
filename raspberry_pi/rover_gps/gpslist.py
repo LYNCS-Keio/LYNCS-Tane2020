@@ -26,6 +26,5 @@ with open(current_dir + '/' + filename + '.csv', 'w') as c:
         pos = [position[0], position[1], distance]
         wri.writerow(pos)
         print(pos)
-        time.sleep(1)
 
 pi.stop()

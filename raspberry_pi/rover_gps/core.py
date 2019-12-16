@@ -74,7 +74,7 @@ def lat_long_measurement(pi, pin):
                     time.sleep(0.1)
             sentence = se.split()
             for i in range(len(sentence)):
-                print(sentence[i][3:6])
+                #print(sentence[i][3:6])
                 if sentence[i][3:6] == 'GGA' or sentence[i][3:6] == 'RMC' or sentence[i][3:6] == 'GLL':
                     lat_and_long = lat_long_reader(sentence[i])
                     #if lat_and_long[0] == 0 or lat_and_long[1] == 0:
