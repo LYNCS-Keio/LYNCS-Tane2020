@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import pynmea2
-import serial
 from math import radians, atan2, acos, sin, cos, tan
 
 __all__ = ['lat_long_reader', 'velocity_reader', 'lat_long_measurement', 'velocity_measurement', 'convert_lat_long_to_r_theta', 'r_theta_to_goal']
@@ -47,7 +46,7 @@ def velocity_reader(sentence):
     return [speed, course]
 
 
-def lat_long_measurement():
+def lat_long_measurement(pi, pin):
     """
     GPSを用いて緯度経度を取得する。
 
@@ -56,11 +55,11 @@ def lat_long_measurement():
     list : list of float or None
         緯度と経度のリスト。これらの情報が取得できなかった場合は取得できなかったものがNoneとなる。
     """
-    s = serial.Serial('/dev/serial0', 9600, timeout=10)
+    s = pi.bb_serial_read_open(pin, 9600, 8)
     while True:
-        se = s.readline()
+        se = pi.bb_serial_read(pin)[1]
         #print(se)
-        sentence = se.decode(encoding='utf-8', errors='replace')
+        sentence = se
         if sentence[3:6] == 'GGA' or sentence[3:6] == 'RMC' or sentence[
                 3:6] == 'GLL':
             lat_and_long = lat_long_reader(sentence)
@@ -68,10 +67,11 @@ def lat_long_measurement():
                 continue
             else:
                 break
+    pi.bb_serial_read_close(pin)
     return [lat_and_long[0], lat_and_long[1]]
 
 
-def velocity_measurement():
+def velocity_measurement(pi, pin):
     """
     GPSから速度を取得する。
 
@@ -84,9 +84,9 @@ def velocity_measurement():
     -----
     speedの単位はknot, courseの単位は度である。
     """
-    s = serial.Serial('/dev/serial0', 9600, timeout=10)
+    s = pi.bb_serial_read_open(pin, 9600, 8)
     while True:
-        sentence = s.readline().decode('utf-8')  # GPSデーターを読み、文字列に変換する
+        #sentence = s.readline().decode('utf-8')  # GPSデーターを読み、文字列に変換する
         if sentence[0] == '$' and ('RMC' in sentence):
             gps_data = velocity_reader(sentence)
             break
@@ -156,3 +156,15 @@ def r_theta_to_goal(goal_lat, goal_long):
     else:
         return convert_lat_long_to_r_theta(
             current_coordinate[0], current_coordinate[1], goal_lat, goal_long)
+
+if __name__ == "__main__":
+    import pigpio
+    import time
+    pi = pigpio.pi()
+    try:
+        while(1):
+            print(lat_long_measurement(pi, 5))
+            time.sleep(0.1)
+    finally:
+        pi.bb_serial_read_close(5)
+        pi.stop()
