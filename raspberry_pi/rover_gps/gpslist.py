@@ -4,6 +4,7 @@ import csv
 import os
 import time
 import sys
+import pigpio
 
 # example
 # python3 gpslist.py lat long
@@ -18,10 +19,13 @@ while os.path.isfile(current_dir + '/' + filename + '.csv') == True:
 
 with open(current_dir + '/' + filename + '.csv', 'w') as c:
     wri = csv.writer(c, lineterminator='\n')
+    pi = pigpio.pi()
     while True:
-        position = gps.lat_long_measurement()
+        position = gps.lat_long_measurement(pi, 5)
         distance = ((position[0] - float(sys.argv[1]))**2 + (position[1] - float(sys.argv[2]))**2)**0.5
         pos = [position[0], position[1], distance]
         wri.writerow(pos)
         print(pos)
         time.sleep(1)
+
+pi.stop()
