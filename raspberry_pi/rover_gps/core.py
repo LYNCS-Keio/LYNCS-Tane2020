@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pynmea2
+import time
 from math import radians, atan2, acos, sin, cos, tan
 
 __all__ = ['lat_long_reader', 'velocity_reader', 'lat_long_measurement', 'velocity_measurement', 'convert_lat_long_to_r_theta', 'r_theta_to_goal']
@@ -67,7 +68,7 @@ def lat_long_measurement(pi, pin):
             if count:
                 try:
                     se += data.decode("utf-8")
-                finally:
+                except:
                     pass
                 time.sleep(0.1)
         sentence = se.split()
@@ -174,7 +175,6 @@ def r_theta_to_goal(goal_lat, goal_long):
 
 if __name__ == "__main__":
     import pigpio
-    import time
     pi = pigpio.pi()
     try:
         while(1):
