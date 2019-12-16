@@ -8,6 +8,7 @@ def lat_long_reader(sentence):
     """
     sentenceから緯度経度を取得する。
 
+
     Returns
     -------
     list : list of float or None
@@ -55,22 +56,31 @@ def lat_long_measurement(pi, pin):
     list : list of float or None
         緯度と経度のリスト。これらの情報が取得できなかった場合は取得できなかったものがNoneとなる。
     """
+    flag = 1
     s = pi.bb_serial_read_open(pin, 9600, 8)
-    while True:
+    while flag:
         count = 1
+        se = ""
         while count: # read echoed serial data
-            (count, data) = pi.bb_serial_read(RX)
+            (count, data) = pi.bb_serial_read(pin)
+            #print(data)
             if count:
-            sentence += data
-            lt += count
-            time.sleep(0.1)
-        print(sentence)
-        if sentence[3:6] == 'GGA' or sentence[3:6] == 'RMC' or sentence[
-                3:6] == 'GLL':
-            lat_and_long = lat_long_reader(sentence)
-            if lat_and_long[0] == 0 or lat_and_long[1] == 0:
-                continue
-            else:
+                try:
+                    se += data.decode("utf-8")
+                finally:
+                    pass
+                time.sleep(0.1)
+        sentence = se.split()
+        for i in range(len(sentence)):
+            print(sentence[i][3:6])
+            if sentence[i][3:6] == 'GGA' or sentence[i][3:6] == 'RMC' or sentence[i][3:6] == 'GLL':
+                lat_and_long = lat_long_reader(sentence[i])
+                #if lat_and_long[0] == 0 or lat_and_long[1] == 0:
+                #    continue
+                #else:
+                #    break
+                #print(lat_and_long)
+                flag = 0
                 break
     pi.bb_serial_read_close(pin)
     return [lat_and_long[0], lat_and_long[1]]
