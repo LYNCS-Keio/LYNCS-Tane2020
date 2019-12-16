@@ -3,7 +3,7 @@
 import pigpio
 
 class ina:
-    pi = pi.pigpio()
+    pi = pigpio.pi()
     ina_addr     = 0x44
     config_addr  = 0x00
     current_addr = 0x01
