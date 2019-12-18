@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "send_recv.cpp"
+#include "send_recv.cc"
 
 PYBIND11_MODULE(send_recv, m) {
     m.doc() = "twelite module test";
