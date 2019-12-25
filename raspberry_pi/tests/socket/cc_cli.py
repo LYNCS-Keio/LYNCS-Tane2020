@@ -3,19 +3,22 @@
 from socket import socket, AF_UNIX, SOCK_STREAM
 import sys
 
-path = 'test.sock'
-
-
-msg = "hello"
-
-for idx in range(1):
-    sys.stdout.write("send to server ({}): {}\n".format(idx, msg))
+def sock_cli(path, msg):
+    sys.stdout.write("send to server ({}): {}\n".format(1, msg))
     s = socket(AF_UNIX, SOCK_STREAM)
     s.connect(path)
-    s.send(msg.encode())
+
+    if type(msg) is str:
+        msg = msg.encode()
+
+    s.send(msg)
     data = s.recv(1024)
+
     sys.stdout.write("receive from server: {}\n".format(data.decode()))
     s.recv
-    s.close()
 
-print (repr(data))
+    s.close()
+    print (repr(data))
+
+if __name__ == "__main__":
+    sock_cli("test.sock", b"hello")
