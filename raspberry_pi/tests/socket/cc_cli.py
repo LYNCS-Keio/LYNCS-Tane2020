@@ -2,25 +2,30 @@
 
 from socket import socket, AF_UNIX, SOCK_STREAM
 import sys
+import time
 
 def sock_cli(path, msg):
-    sys.stdout.write("send to server ({}): {}\n".format(1, msg))
-    s = socket(AF_UNIX, SOCK_STREAM)
-    s.connect(path)
-
     if type(msg) is str:
         msg = msg.encode()
 
     if type(msg) is int:
         msg = msg.to_bytes(4, "little")
 
-    s.send(msg)
-    data = s.recv(1024)
+    while True:
+        sys.stdout.write("send to server ({}): {}\n".format(1, msg))
+        s = socket(AF_UNIX, SOCK_STREAM)
+        s.connect(path)
 
-    sys.stdout.write("receive from server: {}\n".format(data.decode()))
-    s.recv
 
-    s.close()
+        s.send(msg)
+        data = s.recv(1024)
+
+        sys.stdout.write("receive from server: {}\n".format(data.decode()))
+        s.recv
+
+        s.close()
+        time.sleep (1)
+
     print (repr(data))
 
 if __name__ == "__main__":

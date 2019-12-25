@@ -1,10 +1,15 @@
 #define FILEPATH "./test.sock"
 #include "server.h"
+#include "unistd.h"
 
 int main() {
-    setup();
+  setup();
+  while (true) {
     accept();
     read();
     write();
-    unlink();
+  }
+  close();
+  sleep(1);
+  unlink();
 }

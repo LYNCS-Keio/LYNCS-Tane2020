@@ -37,12 +37,11 @@ int setup() {
     return 1;
   }
 
+  addrlen = sizeof(s_un_accept);
   return 0;
 }
 
 int accept() {
-  addrlen = sizeof(s_un_accept);
-
   sock = accept(s0, (struct sockaddr *)&s_un_accept, &addrlen);
   if (sock < 0) {
     perror("accept");
@@ -56,12 +55,15 @@ int accept() {
 void read() {
   memset(buf, 0, sizeof(buf));
   n = read(sock, buf, sizeof(buf));
+  printf("%s\n", buf);
 }
 
 void write() {
-  printf("%s\n", buf);
   write(sock, "HOGE", 4);
 
+}
+
+void close(){
   close(sock);
   close(s0);
 }
