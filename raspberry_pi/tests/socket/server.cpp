@@ -1,24 +1,20 @@
 // https://www.geekpage.jp/programming/linux-network/book/07/7-9.php
 
 #define FILEPATH "./test.sock"
+#include "server.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
+int s0, sock;
+struct sockaddr_un s_un;
+struct sockaddr_un s_un_accept;
+socklen_t addrlen;
+s0 = socket(AF_UNIX, SOCK_STREAM, 0);
 
-int main() {
-  int s0, sock;
-  struct sockaddr_un s_un;
-  struct sockaddr_un s_un_accept;
-  socklen_t addrlen;
-  s0 = socket(AF_UNIX, SOCK_STREAM, 0);
+char buf[1024];
+int flag;
+int n;
 
-  char buf[1024];
-  int flag;
-  int n;
 
+void setup() {
   remove(FILEPATH);
 
   if (s0 < 0) {
@@ -38,7 +34,9 @@ int main() {
     perror("listen");
     return 1;
   }
+}
 
+void accept() {
   addrlen = sizeof(s_un_accept);
 
   sock = accept(s0, (struct sockaddr *)&s_un_accept, &addrlen);
@@ -48,17 +46,23 @@ int main() {
   }
 
   printf("after accept\n");
+}
 
+void read() {
   memset(buf, 0, sizeof(buf));
   n = read(sock, buf, sizeof(buf));
+}
 
+void write() {
   printf ("%s\n", buf);
   write(sock, "HOGE", 4);
 
   close(sock);
   close(s0);
+}
 
-  /* */
+
+void unlink() {
   unlink(FILEPATH);
 
   return 0;
