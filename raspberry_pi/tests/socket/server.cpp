@@ -19,6 +19,8 @@ int main() {
   int flag;
   int n;
 
+  remove(FILEPATH);
+
   if (s0 < 0) {
     perror("socket");
     return 1;

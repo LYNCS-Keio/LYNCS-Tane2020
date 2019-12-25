@@ -11,6 +11,9 @@ def sock_cli(path, msg):
     if type(msg) is str:
         msg = msg.encode()
 
+    if type(msg) is int:
+        msg = msg.to_bytes(4, "little")
+
     s.send(msg)
     data = s.recv(1024)
 
@@ -21,4 +24,4 @@ def sock_cli(path, msg):
     print (repr(data))
 
 if __name__ == "__main__":
-    sock_cli("test.sock", b"hello")
+    sock_cli("test.sock", 80)
