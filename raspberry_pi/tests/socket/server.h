@@ -6,7 +6,17 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-void setup() {
+int s0, sock;
+struct sockaddr_un s_un;
+struct sockaddr_un s_un_accept;
+socklen_t addrlen;
+s0 = socket(AF_UNIX, SOCK_STREAM, 0);
+
+char buf[1024];
+int flag;
+int n;
+
+int setup() {
   remove(FILEPATH);
 
   if (s0 < 0) {
@@ -28,7 +38,7 @@ void setup() {
   }
 }
 
-void accept() {
+int accept() {
   addrlen = sizeof(s_un_accept);
 
   sock = accept(s0, (struct sockaddr *)&s_un_accept, &addrlen);
@@ -53,7 +63,7 @@ void write() {
   close(s0);
 }
 
-void unlink() {
+int unlink() {
   unlink(FILEPATH);
 
   return 0;
