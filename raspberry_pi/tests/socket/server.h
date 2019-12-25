@@ -10,13 +10,13 @@ int s0, sock;
 struct sockaddr_un s_un;
 struct sockaddr_un s_un_accept;
 socklen_t addrlen;
-s0 = socket(AF_UNIX, SOCK_STREAM, 0);
 
 char buf[1024];
 int flag;
 int n;
 
 int setup() {
+  s0 = socket(AF_UNIX, SOCK_STREAM, 0);
   remove(FILEPATH);
 
   if (s0 < 0) {
@@ -36,6 +36,8 @@ int setup() {
     perror("listen");
     return 1;
   }
+
+  return 0;
 }
 
 int accept() {
@@ -48,6 +50,7 @@ int accept() {
   }
 
   printf("after accept\n");
+  return 0;
 }
 
 void read() {
@@ -56,7 +59,7 @@ void read() {
 }
 
 void write() {
-  printf ("%s\n", buf);
+  printf("%s\n", buf);
   write(sock, "HOGE", 4);
 
   close(sock);
