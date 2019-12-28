@@ -4,12 +4,13 @@
 
 int main() {
   setup();
+  accept();
+
   while (true) {
-    accept();
     read();
     write();
   }
+
   close();
-  sleep(1);
   unlink();
 }
