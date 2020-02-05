@@ -27,7 +27,7 @@ class ina:
 
     def get_current(self):
         try:
-            raw = self.pi.i2c_read_i2c_block_data(self.bus, self.current_addr, 2)
+            raw = self.pi.i2c_read_i2c_block_data(self.bus, self.current_addr, 2)[1]
         except:
             print("Failed getting current_data ina260")
         word_data = raw[0] *256 + raw[1]
@@ -45,3 +45,6 @@ class ina:
         except:
             print("Failed reset_chip ina260")
 
+if __name__ == '__main__':
+    i = ina()
+    print (i.get_vol(), i.get_current())
