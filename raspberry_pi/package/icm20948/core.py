@@ -236,7 +236,7 @@ class ICM20948:
         self._addr = i2c_addr
 
         try:
-            self._bus = i2c_bus(handler, self.addr)
+            self._bus = i2c_bus(handler, self._addr)
         except:
             raise ICM_FAILED_INIT
         else:
@@ -277,7 +277,8 @@ class ICM20948:
 
 
 if __name__ == "__main__":
-    imu = ICM20948()
+    pi = pigpio.pi()
+    imu = ICM20948(pi)
 
     while True:
         x, y, z = imu.read_magnetometer_data()
