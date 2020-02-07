@@ -2,5 +2,6 @@ import serial
 
 ser = serial.Serial('/dev/ttyS0', 115200)
 while True:
-    ser.write("0xA5 0x5A 0x80 0x05 0x00 0x00 0x11 0x22 0x33 0x00")
+    data = bytes.fromhex(format(0xA55A8005000011223300, 'x'))
+    ser.write(data)
 ser.close()
