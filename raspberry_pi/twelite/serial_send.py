@@ -1,12 +1,15 @@
 import serial
+import pigpio
 import time
 
-ser = serial.Serial('/dev/ttyS0', 115200)
-while True:
-    #data = bytes.fromhex(format(0xA55A8005000011223300, 'x'))
+pi = pigpio.pi()
+h1 = pi.serial_open("/dev/ttyS0", 115200)
 
-    #data = bytes.fromhex(format(7880010101FFFFFFFFFFFFFFFFXX, 'x'))
-    data = ':0001112233AABBCCXX\r\n'
+#ser = serial.Serial('/dev/ttyS0', 115200)
+while True:
+    #data = ':0001112233AABBCCXX\r\n'
+    
+    pi.serial_write(h1, b'hello!')
     ser.write(data)
     print(data)
     time.sleep(0.1)
