@@ -6,8 +6,7 @@ while True:
     #data = bytes.fromhex(format(0xA55A8005000011223300, 'x'))
 
     #data = bytes.fromhex(format(7880010101FFFFFFFFFFFFFFFFXX, 'x'))
-    print(7801112233AABBCC)
-    data = bytes.fromhex('7801112233AABBCC')
+    data = ':0001112233AABBCCXX\r\n'
     ser.write(data)
     print(data)
     time.sleep(0.1)
