@@ -18,7 +18,7 @@ while True:
     for i in range(len(buf)):
         checksum = checksum ^ buf[i]
     
-    cmd_size = len(header) + len(buf)
+    cmd_size = len(buf)
     cmd = 0x8000 + cmd_size
 
     pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
