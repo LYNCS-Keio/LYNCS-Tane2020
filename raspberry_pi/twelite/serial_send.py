@@ -28,7 +28,7 @@ while True:
     # pi.serial_write(h1, buf)
     # pi.serial_write(h1, [checksum])
 
-    print(header + [0x80, 0x08] + buf + [checksum])
+    print(header + [0x80, 0x08] + buf + [checksum] + [0x04])
     # print(header)
     # print(cmd >> 8)
     # print(cmd & 0b11111111)
