@@ -9,10 +9,17 @@ for i in range(len(buf)):
 
 cmd_size = len(header) + len(buf)
 
+print(cmd_size)
 cmd = 0x8000 + cmd_size
 print(cmd)
-print(bin(cmd & 0b11111111))
+print([cmd >> 8, cmd & 0b111111111])
 print(bin(cmd >> 8))
+
+
+
+
+
+
 
 
 # print(header)
