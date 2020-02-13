@@ -13,20 +13,20 @@ header = [0xA5, 0x5A]
 while True:
 # binary
     checksum = 0x00
-    for i in range(len(header)):
-        checksum = checksum ^ header[i]
+    # for i in range(len(header)):
+    #     checksum = checksum ^ header[i]
     for i in range(len(buf)):
         checksum = checksum ^ buf[i]
     
     cmd_size = len(header) + len(buf)
     cmd = 0x8000 + cmd_size
 
-    # pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
-    pi.serial_write(h1, header)
-    pi.serial_write(h1, [0x80, 0x08])
-    # pi.serial_write(h1, cmd >> 8 & 0b11111111)
-    pi.serial_write(h1, buf)
-    pi.serial_write(h1, [checksum])    
+    pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
+    # pi.serial_write(h1, header)
+    # pi.serial_write(h1, [0x80, 0x08])
+    # # pi.serial_write(h1, cmd >> 8 & 0b11111111)
+    # pi.serial_write(h1, buf)
+    # pi.serial_write(h1, [checksum])
 
     # print(h1, header + [0x80, 0x08] + buf + [checksum])
     print(header)
