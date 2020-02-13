@@ -25,7 +25,7 @@ while True:
     pi.serial_write(h1, header)
     pi.serial_write(h1, format(0x8000 + cmd_size, 'x'))
     pi.serial_write(h1, buf)
-    pi.serial_write(h1, checksum)
+    pi.serial_write(h1, format(checksum, 'x'))
 
 
 # ascii
