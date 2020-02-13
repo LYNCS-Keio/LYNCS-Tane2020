@@ -3,9 +3,9 @@ import pigpio
 import time
 
 pi = pigpio.pi()
-# h1 = pi.serial_open("/dev/ttyS0", 115200)
+h1 = pi.serial_open("/dev/ttyS0", 115200)
 
-ser = serial.Serial('/dev/ttyS0', 115200)
+# ser = serial.Serial('/dev/ttyS0', 115200)
 
 buf = [0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
 header = [0xA5, 0x5A]
@@ -43,7 +43,7 @@ while True:
 # ascii
     data = ':0001112233AABBCCXX\r\n'
     pi.serial_write(h1, data)
-    ser.write(data)
+    # ser.write(data)
     # print(data)
     time.sleep(0.1)
 
