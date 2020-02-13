@@ -21,19 +21,19 @@ while True:
     cmd_size = len(header) + len(buf)
     cmd = 0x8000 + cmd_size
 
-    pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
-    # pi.serial_write(h1, header)
-    # pi.serial_write(h1, [0x80, 0x08])
+    # pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
+    pi.serial_write(h1, header)
+    pi.serial_write(h1, [0x80, 0x08])
     # pi.serial_write(h1, cmd >> 8 & 0b11111111)
-    # pi.serial_write(h1, buf)
-    # # pi.serial_write(h1, [checksum])    
+    pi.serial_write(h1, buf)
+    pi.serial_write(h1, [checksum])    
 
-    print(h1, header + [0x80, 0x08] + buf + [checksum])
-    # print(h1, header)
-    # print(h1, cmd >> 8)
-    # print(h1, cmd & 0b11111111)
-    # print(h1, buf)
-    # print(h1, [checksum])
+    # print(h1, header + [0x80, 0x08] + buf + [checksum])
+    print(h1, header)
+    print(h1, cmd >> 8)
+    print(h1, cmd & 0b11111111)
+    print(h1, buf)
+    print(h1, [checksum])
 
 
 
