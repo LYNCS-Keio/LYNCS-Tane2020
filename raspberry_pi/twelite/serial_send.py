@@ -7,7 +7,7 @@ h1 = pi.serial_open("/dev/ttyS0", 115200)
 
 # ser = serial.Serial('/dev/ttyS0', 115200)
 
-buf = [0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
+buf = [0x00, 0x00, 0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
 header = [0xA5, 0x5A]
 
 while True:
@@ -21,7 +21,7 @@ while True:
     cmd_size = len(header) + len(buf)
     cmd = 0x8000 + cmd_size
 
-    pi.serial_write(h1, header + [0x80, 0x08, 0x00] + buf + [checksum])
+    pi.serial_write(h1, header + [0x80, 0x08] + buf + [checksum])
     # pi.serial_write(h1, header)
     # pi.serial_write(h1, [0x80, 0x08])
     # # pi.serial_write(h1, cmd >> 8 & 0b11111111)
