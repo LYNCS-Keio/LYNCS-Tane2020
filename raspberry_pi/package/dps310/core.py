@@ -78,7 +78,7 @@ class scale_factor():
 
 
 class dps310():
-    def __init__(self, handler, addr):
+    def __init__(self, handler, addr=0x77):
         self.addr = addr
         self.p_osr = None; self.p_rate = None; self.t_osr = None; self.t_rate = None; self.Traw_sc_pre = None
 
