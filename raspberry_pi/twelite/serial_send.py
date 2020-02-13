@@ -28,12 +28,12 @@ while True:
     # pi.serial_write(h1, buf)
     # pi.serial_write(h1, [checksum])
 
-    # print(h1, header + [0x80, 0x08] + buf + [checksum])
-    print(header)
-    print(cmd >> 8)
-    print(cmd & 0b11111111)
-    print(buf)
-    print([checksum])
+    print(h1, header + [0x80, 0x08] + buf + [checksum])
+    # print(header)
+    # print(cmd >> 8)
+    # print(cmd & 0b11111111)
+    # print(buf)
+    # print([checksum])
 
 
 
