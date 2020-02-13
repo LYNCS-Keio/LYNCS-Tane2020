@@ -23,9 +23,9 @@ while True:
     cmd_size = len(header) + len(buf)
 
     pi.serial_write(h1, header)
-    pi.serial_write(h1, 0x8000 + cmd_size)
+    pi.serial_write(h1, [0x8000 + cmd_size])
     pi.serial_write(h1, buf)
-    pi.serial_write(h1, checksum)
+    pi.serial_write(h1, [checksum])
 
 
 # ascii
