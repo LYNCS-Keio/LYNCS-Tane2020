@@ -9,15 +9,21 @@ for i in range(len(buf)):
 
 cmd_size = len(header) + len(buf)
 
-print(header)
-print(0x8000 + cmd_size)
-print(format(0x8000 + cmd_size, 'x'))
-print(buf)
-print(checksum)
+cmd = 0x8000 + cmd_size
+print(cmd)
+print(bin(cmd & 0b11111111))
+print(bin(cmd >> 8))
 
-print(size)
-print(buf)
+
+# print(header)
+# print(0x8000 + cmd_size)
+# print(format(0x8000 + cmd_size, 'x'))
+# print(buf)
+# print(checksum)
+
+# print(size)
+# print(buf)
 # print(len(str(format(buf, 'x'))))
 # print(format(buf, 'x'))
 # print(format(18838593387468, 'x'))
-print(size_calculate(buf))
+# print(size_calculate(buf))
