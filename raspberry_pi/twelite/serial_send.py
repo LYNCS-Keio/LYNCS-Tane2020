@@ -12,8 +12,6 @@ header = [0xA5, 0x5A]
 
 while True:
 # binary
-    buf = 0x112233AABBCC
-    header = 0xA55A
     checksum = 0x00
     for i in range(len(header)):
         checksum = checksum ^ header[i]
