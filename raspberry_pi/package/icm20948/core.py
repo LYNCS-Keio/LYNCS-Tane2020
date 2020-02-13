@@ -14,6 +14,7 @@ class register():
 
     ICM20948_I2C_MST_ODR_CONFIG     = 0x00
     ICM20948_I2C_MST_CTRL           = 0x01
+    ICM20948_I2C_MST_DELAY_CTRL     = 0x02
     ICM20948_I2C_SLV0_ADDR          = 0x03
     ICM20948_I2C_SLV0_REG           = 0x04
     ICM20948_I2C_SLV0_CTRL          = 0x05
@@ -77,7 +78,7 @@ class ICM_FAILED_READING(_ICM_ERROR):
 class ICM_FAILED_WRITING(_ICM_ERROR):
     "Failed writing data on the icm20948"
 
-class ICM20948:
+class ICM20948():
     def write(self, reg, value):
         """Write byte to the sensor."""
         self._bus.writeByte(reg, value)
@@ -231,7 +232,7 @@ class ICM20948:
         value |= (mode & 0x07) << 4
         self.write(register.ICM20948_GYRO_CONFIG_1, value)
 
-    def __init__(self, handler, i2c_addr=I2C_ADDR):
+    def __init__(self, handler, i2c_addr=register.I2C_ADDR):
         self._bank = -1
         self._addr = i2c_addr
 
@@ -243,7 +244,7 @@ class ICM20948:
             pass
 
         self.bank(0)
-        if not self.read(register.ICM20948_WHO_AM_I) == CHIP_ID:
+        if not self.read(register.ICM20948_WHO_AM_I) == register.CHIP_ID:
             raise ICM_FAILED_SETUP
 
         self.write(register.ICM20948_PWR_MGMT_1, 0x01)
