@@ -279,7 +279,7 @@ class icm20948():
 
 if __name__ == "__main__":
     pi = pigpio.pi()
-    imu = ICM20948(pi)
+    imu = icm20948(pi)
 
     while True:
         x, y, z = imu.read_magnetometer_data()
