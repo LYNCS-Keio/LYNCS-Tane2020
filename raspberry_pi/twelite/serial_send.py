@@ -24,7 +24,7 @@ while True:
     cmd = 0x8000 + cmd_size
 
     pi.serial_write(h1, header)
-    pi.serial_write(h1, [cmd >> 8, cmd & 0b11111111])
+    pi.serial_write(h1, [0x80, 0x08])
     # pi.serial_write(h1, cmd >> 8 & 0b1111)
     # pi.serial_write(h1, cmd >> 4 & 0b1111)
     # pi.serial_write(h1, cmd & 0b1111)
