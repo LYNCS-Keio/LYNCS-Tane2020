@@ -1,1 +1,1 @@
-from icm20948.core import *
+from .core import *
