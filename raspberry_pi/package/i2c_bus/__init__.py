@@ -1,1 +1,1 @@
-from i2c_bus.core import *
+from .core import *
