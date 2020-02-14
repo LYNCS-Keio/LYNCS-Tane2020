@@ -22,7 +22,6 @@ class i2c_bus():
     def __init__(self, handler, addr):
         self.pi = handler
         self.addr = addr
-        print("HELLO")
         try:
             self.bus = self.pi.i2c_open(1, self.addr)
         except TypeError:
