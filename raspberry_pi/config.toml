@@ -1,0 +1,19 @@
+[pressure]
+sea_pressure = 10013.25
+
+[height]
+high = 35
+low = 10
+continue_number = 11
+
+[PID]
+P = 0.004
+I = 0.03
+D = 0.0004
+
+[pin]
+Rmotor = 12
+Lmotor = 13
+
+[pic]
+
