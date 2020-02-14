@@ -220,13 +220,14 @@ if __name__ == "__main__":
     dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
     dps.set_OpMode(opMode.CONT_BOTH)
 
-    h_list = []
-    while True:
-        time.sleep(0.01)
-        H = mesure_high()
-        h_list += H[0]
-        print(H)
+    p_list = []
+    try:
+        while True:
+            time.sleep(0.01)
+            get_data = mesure_high()
+            p_list += get_data[1]
+            print(H)
 
     finally:
-        median = statistics.median(h_list)
+        median = statistics.median(p_list)
         print(madian)
