@@ -4,6 +4,8 @@ from package import icm20948
 from package import ina260
 from package import twelite
 from package import pid_controll
+from package import camera
+from package import capture
 
 import time
 import pigpio
