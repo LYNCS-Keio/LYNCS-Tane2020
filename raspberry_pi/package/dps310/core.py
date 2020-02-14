@@ -200,7 +200,7 @@ class dps310():
         else:
             raise DPS_STATUS_ERROR
 
-    def mesure_high(self):
+    def measure_high(self):
         sea_pressure = 1013
         recover_T = self.read_Temperature()
         recover_P = self.read_Pressure()
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     try:
         while True:
             time.sleep(0.01)
-            get_data = mesure_high()
+            get_data = measure_high()
             p_list += get_data[1]
             print(H)
 

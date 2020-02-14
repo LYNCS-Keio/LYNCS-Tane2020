@@ -24,7 +24,7 @@ def pressure_while(height_threshold, continuous_number, mode): #mode　1：data 
 
     n = 0
     while n < continuous_number:
-        height = dps.mesure_high()
+        height = dps.measure_high()
         if (mode)*height >= (mode)*height_threshold:
             n += 1
         else:
