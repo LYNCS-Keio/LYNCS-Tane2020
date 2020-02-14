@@ -200,9 +200,18 @@ class dps310():
         else:
             raise DPS_STATUS_ERROR
 
+    def mesure_high(self):
+        sea_pressure = 1013
+        recover_T = self.read_Temperature()
+        recover_P = self.read_Pressure()
+        height = ((((sea_pressure/recover_P)**(1/5.257)) - 1.) * (recover_T + 273.15)) / 0.0065
+        return [height, recover_T, recover_P]
+
 
 if __name__ == "__main__":
     import time
+    import statistics
+    import toml
     pi = pigpio.pi()
     dps = dps310(pi, 0x77)
     dps.set_OpMode(opMode.IDLE)
@@ -210,8 +219,15 @@ if __name__ == "__main__":
     dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
     dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
     dps.set_OpMode(opMode.CONT_BOTH)
-    while True:
-        time.sleep(0.01)
-        print(dps.read_Temperature(), end="")
-        print(", ", end="")
-        print(dps.read_Pressure())
+
+    p_list = []
+    try:
+        while True:
+            time.sleep(0.01)
+            get_data = mesure_high()
+            p_list += get_data[1]
+            print(H)
+
+    finally:
+        median = statistics.median(p_list)
+        print(madian)
