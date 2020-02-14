@@ -201,6 +201,7 @@ class dps310():
             raise DPS_STATUS_ERROR
 
     def mesure_high(self):
+        sea_pressure = 1013
         recover_T = self.read_Temperature()
         recover_P = self.read_Pressure()
         height = ((((sea_pressure/recover_P)**(1/5.257)) - 1.) * (recover_T + 273.15)) / 0.0065
