@@ -2,37 +2,6 @@ from enum import Enum
 import csv
 import time
 
-""" 
-pi = pigpio.pi()
-dps = dps310.dps310(pi)
-icm = icm20948.icm20948(pi)
-
-index = 0
-current_dir = os.path.dirname(os.path.abspath(__file__))
-filename = 'log' + '%04d' % index
-while os.path.isfile(current_dir + '/' + filename + '.csv') == True:
-    index += 1
-    filename = 'log' + '%04d' % index
-
-with open(current_dir + '/' + filename + '.csv', 'w') as c:
-    wri = csv.writer(c, lineterminator = '\n')
-    while True:
-        dps.set_OpMode(opMode.IDLE)
-        dps.get_coeffs()
-        dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
-        dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
-        dps.set_OpMode(opMode.CONT_BOTH)
-        while True:
-            results = []
-            results.append(dps.read_Temperature())
-            results.append(dps.read_Pressure())
-            results.extend(icm.read_magnetometer_data())
-            results.extend(icm.read_accelerometer_gyro_data())
-            print(results)
-            wri.writerow(results)
-            time.sleep(0.01)
-pi.stop() """
-
 class logger_list_t(Enum):
     TIMESTAMP       = 0
     DPS_PRS         = 1
@@ -95,6 +64,9 @@ class logger():
             self.wri = csv.writer(fd, lineterminator='\n')
 
 
+    def __del__(self):
+        self.fd.close()
+
     def csv_logger(self):
         results = []
         for i in self.logging_list_:
@@ -144,7 +116,10 @@ if __name__ == "__main__":
     import time
     log_list = [logger_list_t.TIMESTAMP, logger_list_t.DPS_PRS, logger_list_t.ICM_GYRO_ACC]
     logger = logger(log_list)
-
-    while True:
-        logger.printer()
-        time.sleep(0.1)
+    
+    try:
+        while True:
+            logger.printer()
+            time.sleep(0.1)
+    finally:
+        del logger
