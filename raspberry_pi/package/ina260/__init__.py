@@ -1,1 +1,1 @@
-from  ina260.core import *
+from  .core import *
