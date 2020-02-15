@@ -62,10 +62,13 @@ class logger():
         if log_dir != None:
             self.fd = open(log_dir, mode='w')
             self.wri = csv.writer(fd, lineterminator='\n')
+        else:
+            self.fd = None
 
 
     def __del__(self):
-        self.fd.close()
+        if self.fd != None:
+            self.fd.close()
 
     def csv_logger(self):
         results = []
