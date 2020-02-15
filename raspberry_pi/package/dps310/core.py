@@ -1,7 +1,6 @@
 import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
 from i2c_bus import *
-from enum import IntEnum, Enum
 
 class _DPS_ERROR(Exception):
     "dps310 base error"
