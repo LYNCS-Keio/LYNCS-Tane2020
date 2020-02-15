@@ -1,6 +1,5 @@
 import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
-import pigpio
 from i2c_bus import *
 from enum import IntEnum, Enum
 
@@ -210,6 +209,7 @@ class dps310():
 
 if __name__ == "__main__":
     import time
+    import pigpio
     import statistics
     import toml
     pi = pigpio.pi()
