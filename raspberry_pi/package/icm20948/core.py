@@ -1,6 +1,5 @@
 import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
-import pigpio
 from i2c_bus import *
 
 import time
@@ -278,6 +277,7 @@ class icm20948():
 
 
 if __name__ == "__main__":
+    import pigpio
     pi = pigpio.pi()
     imu = icm20948(pi)
 
