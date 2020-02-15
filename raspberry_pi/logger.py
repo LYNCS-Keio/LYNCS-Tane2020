@@ -48,7 +48,7 @@ class logger():
                 Dps310 = True
 
             elif i == logger_list_t.ICM_MAG or i == logger_list_t.ICM_GYRO_ACC and Icm20948 == False:
-                import icm20948
+                from package import icm20948
                 if icm_addr == None:
                     self.icm = icm20948.icm20948(self.handler_)
                 else:
@@ -104,7 +104,7 @@ class logger():
 
 if __name__ == "__main__":
     import time
-    log_list = [logger_list_t.DPS_HEIGHT]
+    log_list = [logger_list_t.ICM_MAG]
     logger = logger(log_list)
     
     try:
