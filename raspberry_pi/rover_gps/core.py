@@ -74,7 +74,7 @@ def lat_long_measurement(pi, pin):
                     time.sleep(0.1)
             sentence = se.split()
             for i in range(len(sentence)):
-                #print(sentence[i][3:6])
+                print(sentence[i])
                 if sentence[i][3:6] == 'GGA' or sentence[i][3:6] == 'RMC' or sentence[i][3:6] == 'GLL':
                     lat_and_long = lat_long_reader(sentence[i])
                     #if lat_and_long[0] == 0 or lat_and_long[1] == 0:
@@ -178,10 +178,12 @@ def r_theta_to_goal(goal_lat, goal_long):
 if __name__ == "__main__":
     import pigpio
     pi = pigpio.pi()
+    pi.set_mode(21, pigpio.OUTPUT)
+    pi.write(21, 1)
     try:
         while(1):
-            print(lat_long_measurement(pi, 5))
+            print(lat_long_measurement(pi, 20))
             time.sleep(0.1)
     finally:
-        pi.bb_serial_read_close(5)
+        pi.bb_serial_read_close(20)
         pi.stop()
