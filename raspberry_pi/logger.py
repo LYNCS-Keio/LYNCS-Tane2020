@@ -70,7 +70,7 @@ class logger():
         if self.fd != None:
             self.fd.close()
 
-    def csv_logger(self):
+    def create_results(self):
         results = []
         for i in self.logging_list_:
             if i == logger_list_t.TIMESTAMP:
@@ -80,7 +80,7 @@ class logger():
             elif i == logger_list_t.DPS_TMP:
                 results.append(self.dps.read_Temperature())
             elif i == logger_list_t.DPS_HEIGHT:
-                pass
+                results.extend(self.dps.measure_high())
             elif i == logger_list_t.ICM_GYRO_ACC:
                 results.append(self.icm.read_accelerometer_gyro_data())
             elif i == logger_list_t.ICM_MAG:
@@ -90,34 +90,21 @@ class logger():
             elif i == logger_list_t.INA_VOL:
                 pass
 
-        wri.writerow(results)
+        return results
+
+
+    def csv_logger(self):
+        
+        wri.writerow(self.create_results())
 
     def printer(self):
-        results = []
-        for i in self.logging_list_:
-            if i == logger_list_t.TIMESTAMP:
-                results.append(time.time())
-            elif i == logger_list_t.DPS_PRS:
-                results.append(self.dps.read_Pressure())
-            elif i == logger_list_t.DPS_TMP:
-                results.append(self.dps.read_Temperature())
-            elif i == logger_list_t.DPS_HEIGHT:
-                pass
-            elif i == logger_list_t.ICM_GYRO_ACC:
-                results.extend(self.icm.read_accelerometer_gyro_data())
-            elif i == logger_list_t.ICM_MAG:
-                results.extend(self.icm.read_magnetometer_data())
-            elif i == logger_list_t.INA_CUR:
-                pass
-            elif i == logger_list_t.INA_VOL:
-                pass
-
-        print(results)
+        
+        print(self.create_results())
 
 
 if __name__ == "__main__":
     import time
-    log_list = [logger_list_t.TIMESTAMP, logger_list_t.DPS_PRS, logger_list_t.ICM_GYRO_ACC]
+    log_list = [logger_list_t.DPS_HEIGHT]
     logger = logger(log_list)
     
     try:
