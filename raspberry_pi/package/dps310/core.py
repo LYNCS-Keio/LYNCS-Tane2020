@@ -1,6 +1,5 @@
 import sys, pathlib
 sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
-import pigpio
 from i2c_bus import *
 from enum import IntEnum, Enum
 
@@ -78,7 +77,7 @@ class scale_factor():
 
 
 class dps310():
-    def __init__(self, handler, addr):
+    def __init__(self, handler, addr=0x77):
         self.addr = addr
         self.p_osr = None; self.p_rate = None; self.t_osr = None; self.t_rate = None; self.Traw_sc_pre = None
 
@@ -200,9 +199,19 @@ class dps310():
         else:
             raise DPS_STATUS_ERROR
 
+    def measure_high(self):
+        sea_pressure = 1013
+        recover_T = self.read_Temperature()
+        recover_P = self.read_Pressure()
+        height = ((((sea_pressure/recover_P)**(1/5.257)) - 1.) * (recover_T + 273.15)) / 0.0065
+        return [height, recover_T, recover_P]
+
 
 if __name__ == "__main__":
     import time
+    import pigpio
+    import statistics
+    import toml
     pi = pigpio.pi()
     dps = dps310(pi, 0x77)
     dps.set_OpMode(opMode.IDLE)
@@ -210,7 +219,15 @@ if __name__ == "__main__":
     dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
     dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
     dps.set_OpMode(opMode.CONT_BOTH)
-    while True:
-        time.sleep(0.01)
-        print(dps.read_Temperature())
-        #print(dps.read_Pressure())
+
+    p_list = []
+    try:
+        while True:
+            time.sleep(0.01)
+            get_data = measure_high()
+            p_list += get_data[1]
+            print(H)
+
+    finally:
+        median = statistics.median(p_list)
+        print(madian)
