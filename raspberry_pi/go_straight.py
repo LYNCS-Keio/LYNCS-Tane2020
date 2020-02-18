@@ -2,9 +2,9 @@
 
 from package import pid_controll
 from package import icm20948
+import logger
 import pigpio
 import time
-
 
 rotation = 0
 drift = -1.032555
@@ -29,8 +29,8 @@ p = pid_controll.pid(0.004, 0.03, 0.0004)
 #p = pid_controll.pid(4.8, 23.65, 0.2436)
 pt = time.time()
 
-log_list = [logger_list_t.ICM_MAG]
-logger = logger(log_list)
+log_list = [logger.logger_list_t.ICM_MAG]
+logger = logger.logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/5.csv')
 
 try:
     while True:
@@ -51,9 +51,11 @@ try:
         # print([m, dL, dR, rotation])
 
         logger.printer()
+        logger.csv_logger()
 
         time.sleep(0.01)
 
 finally:
     pi.hardware_PWM(12, 0, 0)
     pi.hardware_PWM(13, 0, 0)
+    pi.stop()
