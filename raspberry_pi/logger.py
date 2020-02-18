@@ -13,7 +13,7 @@ class logger_list_t(Enum):
     INA_CUR         = 7
 
 class logger():
-    def __init__(self, logging_list, log_dir=None, handler=None, dps_addr=None, icm_addr=None, ina_addr=None):
+    def __init__(self, logging_list, log_dir, handler=None, dps_addr=None, icm_addr=None, ina_addr=None):
         if handler == None:
             import pigpio
             self.handler_ = pigpio.pi()
@@ -60,7 +60,7 @@ class logger():
                 Ina260 = True
 
         if log_dir != None:
-            self.fd = open(log_dir, mode='w')
+            fd = open(log_dir, mode='w')
             self.wri = csv.writer(fd, lineterminator='\n')
         else:
             self.fd = None
@@ -95,7 +95,7 @@ class logger():
 
     def csv_logger(self):
         
-        wri.writerow(self.create_results())
+        self.wri.writerow(self.create_results())
 
     def printer(self):
         
