@@ -1,6 +1,7 @@
 from enum import Enum
 import csv
 import time
+from math import pi
 
 class logger_list_t(Enum):
     TIMESTAMP       = 0
@@ -9,11 +10,12 @@ class logger_list_t(Enum):
     DPS_TMP         = 3
     ICM_MAG         = 4
     ICM_GYRO_ACC    = 5
-    INA_VOL         = 6
-    INA_CUR         = 7
+    ICM_MADGWICK    = 6
+    INA_VOL         = 7
+    INA_CUR         = 8
 
 class logger():
-    def __init__(self, logging_list, log_dir, handler=None, dps_addr=None, icm_addr=None, ina_addr=None):
+    def __init__(self, logging_list, log_dir=None, handler=None, dps_addr=None, icm_addr=None, ina_addr=None):
         if handler == None:
             import pigpio
             self.handler_ = pigpio.pi()
@@ -26,6 +28,7 @@ class logger():
         Time = False
         Dps310 = False
         Icm20948 = False
+        Madgwick = False
         Ina260 = False
 
 
@@ -47,13 +50,24 @@ class logger():
                 self.dps.read_Temperature()
                 Dps310 = True
 
-            elif i == logger_list_t.ICM_MAG or i == logger_list_t.ICM_GYRO_ACC and Icm20948 == False:
+            elif i == logger_list_t.ICM_MAG or i == logger_list_t.ICM_GYRO_ACC and Icm20948 == False and Madgwick == False:
                 from package import icm20948
                 if icm_addr == None:
                     self.icm = icm20948.icm20948(self.handler_)
                 else:
                     self.icm = icm20948.icm20948(self.handler_, icm_addr)
                 Icm20948 = True
+            
+            elif i == logger_list_t.ICM_MADGWICK and Madgwick == False:
+                from package import icm20948
+                from package import madgwick_py
+                if icm_addr == None:
+                    self.icm = icm20948.icm20948(self.handler_)
+                else:
+                    self.icm = icm20948.icm20948(self.handler_, icm_addr)
+                self.mad = madgwick_py.MadgwickAHRS()
+                Icm20948 = True
+                Madgwick = True
 
             elif i == logger_list_t.INA_CUR or i == logger_list_t.INA_VOL and Ina260 == False:
                 # import ina260
@@ -85,6 +99,15 @@ class logger():
                 results.append(self.icm.read_accelerometer_gyro_data())
             elif i == logger_list_t.ICM_MAG:
                 results.append(self.icm.read_magnetometer_data())
+            elif i == logger_list_t.ICM_MADGWICK:
+                ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
+                mx, my, mz = self.icm.read_magnetometer_data()
+                gx,gy,gz=gx*pi/180,gy*pi/180,gz*pi/180
+
+                self.mad.update([gx,gy,gz],[ax,ay,az],[mx,-my,-mz])
+                x,y,z=self.mad.quaternion.to_euler_angles()
+                
+                results.extend([x*180/pi,y*180/pi,z*180/pi])
             elif i == logger_list_t.INA_CUR:
                 pass
             elif i == logger_list_t.INA_VOL:
@@ -104,12 +127,12 @@ class logger():
 
 if __name__ == "__main__":
     import time
-    log_list = [logger_list_t.ICM_MAG]
+    log_list = [logger_list_t.ICM_MADGWICK]
     logger = logger(log_list)
     
     try:
         while True:
             logger.printer()
-            time.sleep(0.1)
+            time.sleep(0.01)
     finally:
         del logger
