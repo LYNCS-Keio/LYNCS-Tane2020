@@ -17,6 +17,7 @@
 """
 
 import warnings
+import time
 import numpy as np
 from numpy.linalg import norm
 from .quaternion import Quaternion
@@ -41,6 +42,11 @@ class MadgwickAHRS:
             self.quaternion = quaternion
         if beta is not None:
             self.beta = beta
+
+        self.lastime = time.time()
+
+    def update_lastime(self):
+        self.lastime = time.time()
 
     def update(self, gyroscope, accelerometer, magnetometer):
         """
@@ -95,8 +101,10 @@ class MadgwickAHRS:
         qdot = (q * Quaternion(0, gyroscope[0], gyroscope[1], gyroscope[2])) * 0.5 - self.beta * step.T
 
         # Integrate to yield quaternion
-        q += qdot * self.samplePeriod
+        nowtime = time.time()
+        q += qdot * (nowtime - self.lastime)
         self.quaternion = Quaternion(q / norm(q))  # normalise quaternion
+        self.lastime = nowtime
 
     def update_imu(self, gyroscope, accelerometer):
         """
@@ -133,5 +141,7 @@ class MadgwickAHRS:
         qdot = (q * Quaternion(0, gyroscope[0], gyroscope[1], gyroscope[2])) * 0.5 - self.beta * step.T
 
         # Integrate to yield quaternion
-        q += qdot * self.samplePeriod
+        nowtime = time.time()
+        q += qdot * (nowtime - self.lastime)
         self.quaternion = Quaternion(q / norm(q))  # normalise quaternion
+        self.lastime = nowtime
