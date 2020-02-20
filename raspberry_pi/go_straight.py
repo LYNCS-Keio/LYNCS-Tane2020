@@ -14,21 +14,27 @@ rotation = 0
 
 pi = pigpio.pi()
 
-pi.set_mode(11, pigpio.OUTPUT)
-pi.set_mode(9, pigpio.OUTPUT)
-pi.set_mode(10, pigpio.OUTPUT)
 pi.set_mode(13, pigpio.OUTPUT)
 pi.set_mode(12, pigpio.OUTPUT)
+<<<<<<< HEAD
 pi.write(11, 0)
 pi.write(9, 0)
 pi.write(10, 0)
 #svL, svR = pi.hardware_PWM(13, 50, 75000), pi.hardware_PWM(12, 50, 75000)
+=======
+svL, svR = pi.hardware_PWM(13, 50, 75000), pi.hardware_PWM(12, 50, 75000)
+>>>>>>> f19193eb10373e0c19abc6beb69b48ce60d4bec0
 
 
 icm = icm20948.icm20948(pi)
 p = pid_controll.pid(0.004, 0.03, 0.0004)
+<<<<<<< HEAD
 #p = pid_controll.pid(4.8, 23.65, 0.2436)
 mad = madgwick_py.MadgwickAHRS()
+=======
+#p = pid_controll.pid(4.8, 23.65, 0.2436) Tane19のゲイン
+mad = madgwick_py.MadgwickAHRS(0.05)
+>>>>>>> f19193eb10373e0c19abc6beb69b48ce60d4bec0
 pt = time.time()
 
 log_list = [logger.logger_list_t.ICM_MADGWICK]
