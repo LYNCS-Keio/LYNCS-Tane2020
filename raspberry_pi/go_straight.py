@@ -2,12 +2,14 @@
 
 from package import pid_controll
 from package import icm20948
+from package import madgwick_py
 import logger
 import pigpio
 import time
+from math import P_I
 
 rotation = 0
-drift = -1.032555
+# drift = -1.032555
 
 
 pi = pigpio.pi()
@@ -23,19 +25,25 @@ pi.write(10, 0)
 svL, svR = pi.hardware_PWM(13, 50, 75000), pi.hardware_PWM(12, 50, 75000)
 
 
-# mpu = MPU6050.MPU6050(0x68)
 icm = icm20948.icm20948(pi)
 p = pid_controll.pid(0.004, 0.03, 0.0004)
 #p = pid_controll.pid(4.8, 23.65, 0.2436)
+mad = madgwick_py.MadgwickAHRS(0.05)
 pt = time.time()
 
 log_list = [logger.logger_list_t.ICM_MAG]
-logger = logger.logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/5.csv')
+logger = logger.logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ time.strftime(%Y%m%d_%H:%M) +'.csv')
 
 try:
     while True:
-        # gyro = mpu.get_gyro_data_lsb()[2] + drift
-        gyro = icm.read_accelerometer_gyro_data()[5]
+        ax, ay, az, gx, gy, gz = icm.read_accelerometer_gyro_data()
+        mx, my, mz = icm.read_magnetometer_data()
+        gx, gy, gz = gx*PI/180, gy*PI/180, gz*PI/180
+
+        x, y, z = mad.update([gx,gy,gz], [ax,ay,az], [mx,-my,-mz])
+        x, y, z = x*PI/180, y*PI/180, z*PI/180
+        gyro = z
+
         nt = time.time()
         dt = nt - pt
         pt = nt
