@@ -1,3 +1,6 @@
 [submodule "raspberry_pi/twelite/pybind11"]
 	path = raspberry_pi/twelite/pybind11
 	url = https://github.com/pybind/pybind11.git
+[submodule "raspberry_pi/twelite/TWE-Lite.hpp"]
+	path = raspberry_pi/twelite/TWE-Lite.hpp
+	url = https://github.com/sk2sat/TWE-Lite.hpp.git
