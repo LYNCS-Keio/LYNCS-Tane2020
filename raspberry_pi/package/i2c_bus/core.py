@@ -1,18 +1,18 @@
 import pigpio
 
-class I2C_ERROR(Exception):
-    "I2C class error"
+class _I2C_ERROR(Exception):
+    "i2c_bus base error"
 
-class I2C_FAILED(I2C_ERROR):
-    "Something went wrong"
+class I2C_FAILED(_I2C_ERROR):
+    "Something went wrong on i2c_bus"
 
-class I2C_FAILED_OPEN(I2C_ERROR):
+class I2C_FAILED_OPEN(_I2C_ERROR):
     "Failed Opening bus error"
 
-class I2C_FAILED_READING(I2C_ERROR):
+class I2C_FAILED_READING(_I2C_ERROR):
     "Failed reading the device"
 
-class I2C_FAILED_WRITING(I2C_ERROR):
+class I2C_FAILED_WRITING(_I2C_ERROR):
     "Failed writing on the device"
 
 
@@ -49,11 +49,15 @@ class i2c_bus():
 
     def readBytes(self, reg, length):
         try:
-            val = self.pi.i2c_read_i2c_block_data(self.bus, reg, length)
+            (ret, val) = self.pi.i2c_read_i2c_block_data(self.bus, reg, length)
+            if ret >= 0:
+                int_val = [x for x in val]
+            else:
+                raise I2C_FAILED_READING
         except:
             raise I2C_FAILED_READING
         else:
-            return val
+            return int_val
 
     def writeByte(self, reg, data):
         try:
@@ -74,4 +78,3 @@ class i2c_bus():
 
     def __del__(self):
         self.pi.i2c_close(self.bus)
-
