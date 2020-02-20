@@ -6,7 +6,7 @@ from package import madgwick_py
 import logger
 import pigpio
 import time
-from math import P_I
+from math import pi as PI
 
 rotation = 0
 # drift = -1.032555
@@ -32,7 +32,7 @@ mad = madgwick_py.MadgwickAHRS(0.05)
 pt = time.time()
 
 log_list = [logger.logger_list_t.ICM_MAG]
-logger = logger.logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ time.strftime(%Y%m%d_%H:%M) +'.csv')
+logger = logger.logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ 'log_1' +'.csv')
 
 try:
     while True:
@@ -40,7 +40,8 @@ try:
         mx, my, mz = icm.read_magnetometer_data()
         gx, gy, gz = gx*PI/180, gy*PI/180, gz*PI/180
 
-        x, y, z = mad.update([gx,gy,gz], [ax,ay,az], [mx,-my,-mz])
+        mad.update([gx,gy,gz], [ax,ay,az], [mx,-my,-mz])
+        x, y, z = mad.quaternion.to_euler_angles()
         x, y, z = x*PI/180, y*PI/180, z*PI/180
         gyro = z
 

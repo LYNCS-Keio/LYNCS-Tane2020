@@ -74,8 +74,8 @@ class logger():
                 Ina260 = True
 
         if log_dir != None:
-            fd = open(log_dir, mode='w')
-            self.wri = csv.writer(fd, lineterminator='\n')
+            self.fd = open(log_dir, mode='w')
+            self.wri = csv.writer(self.fd, lineterminator='\n')
         else:
             self.fd = None
 
