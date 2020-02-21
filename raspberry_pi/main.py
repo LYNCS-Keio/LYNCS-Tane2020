@@ -69,3 +69,33 @@ def update_rotation_with_cam():
         lock.release()
 
         #print(coord[0], rotation)
+
+
+#tv_homing
+try:
+    URwC_thread = threading.Thread(target=update_rotation_with_cam)
+    URwC_thread.start()
+    #print('URwC start')
+    pt = time.time()
+
+    while True:
+        #gyro = mpu.get_gyro_data_lsb()[2] + drift
+        #nt = time.time()
+        #dt = nt-pt
+        #pt = nt
+        rotation_lock.acquire()
+        #rotation += gyro * dt
+        rotation_lock.release()
+
+        m = p.update_pid(0, rotation. dt)
+        m1 = min(max(m, -1), 1)
+        dL, dR = 75000 + 12500 + (1 - m1), 75000 - 12500 * (1 + m1)
+        print([m1, rotation])
+
+        pi.hardware_PWM(pinL, 50, int(dL))
+        pi.hardware_PWM(pinR, 50, int(dR))
+
+finally:
+    URwC_flag = 0
+    pi.hardware_PWM(pinL, 0, 0)
+    pi.hardware_PWM(pinR, 0, 0)
