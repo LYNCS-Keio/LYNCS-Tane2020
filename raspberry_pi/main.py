@@ -39,3 +39,33 @@ pressure_while(toml_dic['height']['high'], toml_dic['height']['continue_number']
 pressure_while(toml_dic['height']['low'], toml_dic['height']['continue_number'], -1)
 
 
+
+#tv_homing from Noshiro-2019
+
+Aov = 54 # angle of view
+height = 240
+width = 320
+rotation = 0
+cam_interval = 1.5
+area = 400
+lock = threading.Lock()
+URwC_flag = 1
+
+def update_rotation_with_cam():
+    global rotation
+    cap = capture.capture()
+    cam = camera.CamAnalysis()
+    while URwC_flag == 1:
+        stream = cap.cap()
+        cam.morphology_extract(stream)
+        cam.save_all_outputs()
+        coord = cam.contour_find()
+
+        conX = ((coord[0] - width / 2) / (width / 2)) / math.sqrt(3)
+
+        lock.acquire()
+        rotation = math.degrees(math.atan(-conX))
+        area = coord[2]
+        lock.release()
+
+        #print(coord[0], rotation)
