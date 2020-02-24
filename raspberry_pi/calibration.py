@@ -2,11 +2,11 @@ from package import icm20948
 import csv
 import os
 
-b = [0.0, 0.0, 0.0, 0.1] #[x, y, z, r]
+b = [30.0, 0.0, 15.0, 20] #[x, y, z, r]
 x = 0.0
 y = 0.0
 z = 0.0
-lr = 0.01
+lr = 0.0001
 
 def update_magnetometer_data(x, y, z):
     dx = x - b[0]
@@ -26,11 +26,10 @@ if __name__ == "__main__":
     pi = pigpio.pi()
     imu = icm20948.icm20948(pi)
 
-    while open(current_dir + '/' + 'log0001' + '.csv', 'w') as c:
+    with open(current_dir + '/' + 'log0001' + '.csv', 'w') as c:
         f = csv.writer(c, lineterminator = '\n')
         while True:
             x, y, z = imu.read_magnetometer_data()
             update_magnetometer_data(x, y, z)
-            b.append([x, y, z])
-            print(b)
-            f.writerow(b)
+            print(b+[x,y,z])
+            f.writerow(b+[x, y, z])
