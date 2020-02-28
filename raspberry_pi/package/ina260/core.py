@@ -1,36 +1,65 @@
 #thanks to https://github.com/charkster/INA260/blob/master/INA260_MINIMAL.py
 
-import pigpio
+import sys, pathlib
+sys.path.append( str(pathlib.Path(__file__).resolve().parent) + '/../' )
+from i2c_bus import *
 
-class ina:
-    def __init__(self):
-        self.pi = pigpio.pi()
-        ina_addr     = 0x40
-        self.config_addr  = 0x00
-        self.current_addr = 0x01
-        self.vol_addr     = 0x02
-        self.lsb          = 1.25
+
+class _INA_ERROR(Exception):
+    "ina260 base error"
+
+class INA_FAILED(_INA_ERROR):
+    "Something went wrong on ina260"
+
+class INA_FAILED_INIT(_INA_ERROR):
+    "Failed initializing ina260"
+
+class INA_FAILED_SETUP(_INA_ERROR):
+    "Failed setting up ina260"
+
+class INA_FAILED_READING(_INA_ERROR):
+    "Failed reading data from the ina260"
+
+class INA_FAILED_WRITING(_INA_ERROR):
+    "Failed writing data on the ina260"
+
+
+class register():
+    CONFIG_REG      = 0x00
+    CURRENT_REG     = 0x01
+    BUS_VOL_REG     = 0x02
+    POWER_REG       = 0x03
+    MASK_ENABLE_REG = 0x06
+    ALERT_LIMIT_REG = 0x07
+
+
+class ina260():
+    def __init__(self, handler, ina_addr=0x40):
+        self.addr = ina_addr
+        self.lsb = 1.25
 
         try:
-            self.bus = self.pi.i2c_open(1, ina_addr)
+            self.__bus = i2c_bus(handler, self.addr)
         except:
-            print("Failed initializing ina260")
+            raise INA_FAILED_INIT
 
-    def get_vol(self):
+
+    def get_voltage(self):
         try:
-            raw = self.pi.i2c_read_i2c_block_data(self.bus, self.vol_addr, 2)[1]
+            raw = self.__bus.readBytes(register.BUS_VOL_REG, 2)
         except:
-            print("Failed getting vol_data ina260")
-        word_data = raw[0] *256 + raw[1]
+            raise INA_FAILED_READING
+        word_data = raw[0] << 8 | raw[1]
         vol = float(word_data) / 1000 * self.lsb
         return vol 
 
+
     def get_current(self):
         try:
-            raw = self.pi.i2c_read_i2c_block_data(self.bus, self.current_addr, 2)[1]
+            raw = self.__bus.readBytes(register.CURRENT_REG, 2)
         except:
-            print("Failed getting current_data ina260")
-        word_data = raw[0] *256 + raw[1]
+            raise INA_FAILED_READING
+        word_data = raw[0] << 8 | raw[1]
         current_sign_bit = word_data >> 15
         if (current_sign_bit == 1 and word_data & 1 << 15):
             word_data -= 1 << 16
@@ -39,12 +68,21 @@ class ina:
         return current
 
     def reset_chip(self):
-        byte_list = [0x80, 0x00]
         try:
-            self.pi.i2c_write_i2c_block_data(self.bus, self.config_addr, byte_list)
+            self.__bus.writeWordBitfield(register.CONFIG_REG, 0x8000, 15, 1)
         except:
-            print("Failed reset_chip ina260")
+            raise INA_FAILED_WRITING
+
 
 if __name__ == '__main__':
-    i = ina()
-    print (i.get_vol(), i.get_current())
+    import pigpio
+    import time
+    pi = pigpio.pi()
+    ina = ina260(pi)
+    try:
+        while True:
+            print (ina.get_voltage(), ina.get_current())
+            time.sleep(0.05)
+    
+    finally:
+        pass
