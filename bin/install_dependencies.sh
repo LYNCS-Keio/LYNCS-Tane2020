@@ -69,9 +69,9 @@ if [ ! "$ret" = "0" ]; then
         echo "Download Failed!"
     else
         echo "Download Success"
-        echo export PYENV_ROOT=/home/$user/.pyenv >> /home/"$user"/.profile
-        echo export PATH=$PYENV_ROOT/bin:$PATH >> /home/"$user"/.profile
-        echo eval "$(pyenv init -)" >> /home/"$user"/.profile
+        echo 'export PYENV_ROOT=/home/$user/.pyenv' >> /home/"$user"/.profile
+        echo export 'PATH=$PYENV_ROOT/bin:$PATH' >> /home/"$user"/.profile
+        echo 'eval "$(pyenv init -)"' >> /home/"$user"/.profile
         echo "pyenv installed!"
     fi
 
