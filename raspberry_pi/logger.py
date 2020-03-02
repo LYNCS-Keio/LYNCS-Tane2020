@@ -96,9 +96,9 @@ class logger():
             elif i == logger_list_t.DPS_HEIGHT:
                 results.extend(self.dps.measure_high())
             elif i == logger_list_t.ICM_GYRO_ACC:
-                results.append(self.icm.read_accelerometer_gyro_data())
+                results.extend(self.icm.read_accelerometer_gyro_data())
             elif i == logger_list_t.ICM_MAG:
-                results.append(self.icm.read_magnetometer_data())
+                results.extend(self.icm.read_magnetometer_data())
             elif i == logger_list_t.ICM_MADGWICK:
                 ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
                 mx, my, mz = self.icm.read_magnetometer_data()
@@ -127,12 +127,21 @@ class logger():
 
 if __name__ == "__main__":
     import time
-    log_list = [logger_list_t.ICM_MADGWICK]
-    logger = logger(log_list)
+    import pigpio
+    pi = pigpio.pi()
+    log_list = [logger_list_t.ICM_MAG]
+    logger = logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ 'log_0' +'.csv')
+    pi.set_mode(13, pigpio.OUTPUT)
+    pi.set_mode(12, pigpio.OUTPUT)
+    pi.hardware_PWM(13, 50, 90000)
+    pi.hardware_PWM(12, 50, 90000)
     
     try:
         while True:
-            logger.printer()
+            logger.csv_logger()
             time.sleep(0.01)
     finally:
+        pi.hardware_PWM(12, 0, 0)
+        pi.hardware_PWM(13, 0, 0)
+        pi.stop()
         del logger
