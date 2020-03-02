@@ -51,6 +51,8 @@ class logger():
                 Dps310 = True
 
             elif i == logger_list_t.ICM_MAG or i == logger_list_t.ICM_GYRO_ACC and Icm20948 == False and Madgwick == False:
+                self.b = [30.0, 0.0, 15.0, 20]
+                self.lr = 0.0001
                 from package import icm20948
                 if icm_addr == None:
                     self.icm = icm20948.icm20948(self.handler_)
@@ -59,6 +61,8 @@ class logger():
                 Icm20948 = True
             
             elif i == logger_list_t.ICM_MADGWICK and Madgwick == False:
+                self.b = [30.0, 0.0, 15.0, 20]
+                self.lr = 0.0001
                 from package import icm20948
                 from package import madgwick_py
                 if icm_addr == None:
@@ -98,7 +102,19 @@ class logger():
             elif i == logger_list_t.ICM_GYRO_ACC:
                 results.extend(self.icm.read_accelerometer_gyro_data())
             elif i == logger_list_t.ICM_MAG:
-                results.extend(self.icm.read_magnetometer_data())
+                x, y, z = self.icm.read_magnetometer_data()
+
+                dx = x - self.b[0]
+                dy = y - self.b[1]
+                dz = z - self.b[2]
+                f = dx*dx + dy*dy + dz*dz - self.b[3]*self.b[3]
+                
+                self.b[0] = self.b[0] + 4 * self.lr * f * dx
+                self.b[1] = self.b[1] + 4 * self.lr * f * dy
+                self.b[2] = self.b[2] + 4 * self.lr * f * dz
+                self.b[3] = self.b[3] + 4 * self.lr * f * self.b[3]
+
+                results.extend([x-self.b[0], y-self.b[1], z-self.b[2]])
             elif i == logger_list_t.ICM_MADGWICK:
                 ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
                 mx, my, mz = self.icm.read_magnetometer_data()
@@ -128,20 +144,20 @@ class logger():
 if __name__ == "__main__":
     import time
     import pigpio
-    pi = pigpio.pi()
-    log_list = [logger_list_t.ICM_MAG]
+    pi_ = pigpio.pi()
+    log_list = [logger_list_t.ICM_MAG, logger_list_t.ICM_MADGWICK]
     logger = logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ 'log_0' +'.csv')
-    pi.set_mode(13, pigpio.OUTPUT)
-    pi.set_mode(12, pigpio.OUTPUT)
-    pi.hardware_PWM(13, 50, 90000)
-    pi.hardware_PWM(12, 50, 90000)
+    pi_.set_mode(13, pigpio.OUTPUT)
+    pi_.set_mode(12, pigpio.OUTPUT)
+    pi_.hardware_PWM(13, 50, 90000)
+    pi_.hardware_PWM(12, 50, 90000)
     
     try:
         while True:
             logger.csv_logger()
             time.sleep(0.01)
     finally:
-        pi.hardware_PWM(12, 0, 0)
-        pi.hardware_PWM(13, 0, 0)
-        pi.stop()
+        pi_.hardware_PWM(12, 0, 0)
+        pi_.hardware_PWM(13, 0, 0)
+        pi_.stop()
         del logger
