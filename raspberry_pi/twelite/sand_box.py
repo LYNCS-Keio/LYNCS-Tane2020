@@ -1,23 +1,36 @@
-import serial
-import pigpio
-import time
+def make_checksum(buf):
+    checksum = 0x00
+    for i in range(len(buf)):
+        checksum = checksum ^ buf[i]
+    return checksum
 
-pi = pigpio.pi()
-h1 = pi.serial_open("/dev/ttyS0", 115200)
+buf = [0x00, 0x10, 0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
+header = [0xA5, 0x5A] # ヘッダ
+data_size = [0x80, 0x08]
+checksum = make_checksum(data_size+buf)
+test = header + data_size + buf + [checksum]
 
-# data = ':DBF306X'
-# pi.serial_write(h1, data)
+def make_data_size(data_size):
+    minus_ = [0x80, 0x00]
+    for i in range(2):
+        data_size[i] -= minus_[i]
+    res = (data_size[0] << 8) + data_size[1]
+    return res
 
-buf = [0xA5, 0x5A, 0xF2, 0x06, 0x02]
+def read_binary():
+    # ヘッダがくるまで
+    buf = test
+    if buf[0] != 0xA5:
+        return 0
+    if buf[1] != 0x5A:
+        return 0
 
-checksum = 0x00
-for i in range(len(buf)):
-    checksum = checksum ^ buf[i]
+    # データ長をだす
+    data_size = make_data_size([buf[2], buf[3]])
 
-pi.serial_write(h1, [0xA5, 0x5A, 0xF2, 0x06, 0x02] + [checksum])
-print(buf + [checksum])
+    print(data_size)
+    for i in range(len(buf)):
+        print(hex(buf[i]))
+    #print(bytes.hex(line))
 
-time.sleep(1)
-
-line = pi.serial_read(h1)
-print(line)
+read_binary()

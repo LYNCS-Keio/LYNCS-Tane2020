@@ -2,38 +2,33 @@ import serial
 import pigpio
 import time
 
-pi = pigpio.pi()
-h1 = pi.serial_open("/dev/ttyS0", 115200)
+# buf = [0x00, 0x10, 0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
+header = [0xA5, 0x5A] # ヘッダ
 
-# ser = serial.Serial('/dev/ttyS0', 115200)
-
-buf = [0x00, 0x10, 0x11, 0x22, 0x33, 0xAA, 0xBB, 0xCC]
-header = [0xA5, 0x5A]
-
-while True:
-# binary
+def make_checksum(buf):
     checksum = 0x00
     for i in range(len(buf)):
         checksum = checksum ^ buf[i]
-    
+    return checksum
+
+def send_binary(buf):
     cmd_size = len(buf)
-    cmd = 0x8000 + cmd_size
-
-    pi.serial_write(h1, [0xA5, 0x5A, 0x80, 0x08, 0x00, 0xA0, 0x13, 0x00, 0xFF, 0x12, 0x34, 0x56, 0x3D])
-    # i.serial_write(h1, header + [cmd >> 8, cmd & 0x11111111] + buf + [checksum])
-
-    print([0xA5, 0x5A, 0x80, 0x08, 0x00, 0xA0, 0x13, 0x00, 0xFF, 0x12, 0x34, 0x56, 0x3D])
+    data_size = 0x8000 + cmd_size # データ長
+    buf = buf + [0x00] #宛先(0x00:親機宛, 0x78:子機宛)
+    buf = buf + [0x01] # コマンド種別(0x80未満で任意)
+    checksum  = make_checksum(buf) # チェックサム
+    pi.serial_write(h1, header + [data_size >> 8, data_size & 0b11111111] + buf + [checksum])
     # print(header + [0x80, 0x08] + buf + [checksum])
 
 
-
-# ascii
-    # data = ':0001112233AABBCCXX\r\n'
-    # pi.serial_write(h1, data)
-    # # ser.write(data)
-    # print(data)
-
-
-    time.sleep(0.1)
-
-ser.close()
+if __name__ == "__main__":
+    pi = pigpio.pi()
+    h1 = pi.serial_open("/dev/ttyS0", 115200)
+    
+    try:
+        while True:
+            buf = input()
+            send_binary(buf)
+            time.sleep(0.1)
+    
+    finally:
