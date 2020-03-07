@@ -14,8 +14,8 @@ def make_checksum(buf):
 def send_binary(buf):
     cmd_size = len(buf)
     data_size = 0x8000 + cmd_size # データ長
-    buf = buf + [0x00] #宛先(0x00:親機宛, 0x78:子機宛)
-    buf = buf + [0x01] # コマンド種別(0x80未満で任意)
+    buf = [0x00] + buf # 宛先(0x00:親機宛, 0x78:子機宛)
+    buf = [0x01] + buf # コマンド種別(0x80未満で任意)
     checksum  = make_checksum(buf) # チェックサム
     pi.serial_write(h1, header + [data_size >> 8, data_size & 0b11111111] + buf + [checksum])
     # print(header + [0x80, 0x08] + buf + [checksum])
