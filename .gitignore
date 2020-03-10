@@ -104,3 +104,6 @@ venv.bak/
 
 # vscode
 .vscode/
+
+#csv file
+.csv
