@@ -1,17 +1,12 @@
 # -*-coding: utf-8 -*-
-
-from package import pid_controll
 from package import icm20948
-# from package import madgwick_py
 import pigpio
 import time
 from math import pi as PI
 from math import atan2
 from statistics import mean
 
-pi = pigpio.pi()
-icm = icm20948.icm20948(pi)
-def calibrate_mag(sec, b, lr):
+def calibrate_mag(pi, icm, sec, b, lr):
     Flag = True
     pi.hardware_PWM(12, 50, 75000)
     pi.hardware_PWM(13, 50, 75000)
@@ -44,7 +39,7 @@ def calibrate_mag(sec, b, lr):
     pi.hardware_PWM(13, 50, 75000)
 
 
-def calc_drift(sec):
+def calc_drift(pi, icm, sec, drift):
     pi.hardware_PWM(13, 50, 75000)
     pi.hardware_PWM(12, 50, 75000)
     Flag = True
@@ -65,54 +60,53 @@ def calc_drift(sec):
             pass
         if (time.time() - s_t) > sec:
             Flag = False
-    gx_drift = mean(gx_drift)
-    gy_drift = mean(gy_drift)
-    gz_drift = mean(gz_drift)
+    drift[0] = mean(gy_drift)
+    drift[1] = mean(gz_drift)
+    drift[2] = mean(gx_drift)
 
 
-def update_azimuth():
+def update_azimuth(icm, b):
     mx, my, mz = icm.read_magnetometer_data()
-    azimuth = atan2(my-b[1], mx-b[0])*180/PI
+    return atan2(my-b[1], mx-b[0])*180/PI
 
 
-'''
-try:
-    calibrate_mag(30)
-    update_azimuth()
-    calc_drift(30)
-    
-    pt = time.time()
-    while True:
-        try:
-            ax, ay, az, gx, gy, gz = icm.read_accelerometer_gyro_data()
-        except KeyboardInterrupt:
-            raise KeyboardInterrupt
-        except:
-            gz = 0
-        finally:
-            pass
+if __name__ == '__main__':
+    try:
+        calibrate_mag(30)
+        update_azimuth()
+        calc_drift(30)
+        
+        pt = time.time()
+        while True:
+            try:
+                ax, ay, az, gx, gy, gz = icm.read_accelerometer_gyro_data()
+            except KeyboardInterrupt:
+                raise KeyboardInterrupt
+            except:
+                gz = 0
+            finally:
+                pass
 
-        # mad.update([gx,gy,gz], [ax,ay,az], [mx,-my,-mz])
-        # x, y, z = mad.quaternion.to_euler_angles()
-        # x, y, z = x*180/PI, y*180/PI, z*180/PI
+            # mad.update([gx,gy,gz], [ax,ay,az], [mx,-my,-mz])
+            # x, y, z = mad.quaternion.to_euler_angles()
+            # x, y, z = x*180/PI, y*180/PI, z*180/PI
 
-        nt = time.time()
-        dt = nt - pt
-        pt = nt
-        azimuth += gz*dt
-        m = p.update_pid(0, azimuth, dt)
+            nt = time.time()
+            dt = nt - pt
+            pt = nt
+            azimuth += gz*dt
+            m = p.update_pid(0, azimuth, dt)
 
-        m1 = min([max([m, -1]), 1])
+            m1 = min([max([m, -1]), 1])
 
-        dL, dR = 75000 + 12500 * (SPEED - m1), 75000 - 12500 * (SPEED + m1)
-        pi.hardware_PWM(13, 50, int(dL))
-        pi.hardware_PWM(12, 50, int(dR))
+            dL, dR = 75000 + 12500 * (SPEED - m1), 75000 - 12500 * (SPEED + m1)
+            pi.hardware_PWM(13, 50, int(dL))
+            pi.hardware_PWM(12, 50, int(dR))
 
-except KeyboardInterrupt:
-    pass        
+    except KeyboardInterrupt:
+        pass        
 
-finally:
-    pi.hardware_PWM(12, 0, 0)
-    pi.hardware_PWM(13, 0, 0)
-    pi.stop()
-'''
+    finally:
+        pi.hardware_PWM(12, 0, 0)
+        pi.hardware_PWM(13, 0, 0)
+        pi.stop()

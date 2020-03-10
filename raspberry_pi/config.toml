@@ -7,13 +7,20 @@ low = 10
 continue_number = 11
 
 [PID]
-P = 0.004
-I = 0.03
-D = 0.0004
+P = 0.002 
+I = 0.005 
+D = 0.003
 
 [pin]
 Rmotor = 12
 Lmotor = 13
 
-[pic]
+[camera]
+start_distance = 0.003
 
+[gps]
+goal_lat = 0
+goal_long = 0
+
+[icm_calib]
+learning_rate = 0.0001
