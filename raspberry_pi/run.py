@@ -9,8 +9,9 @@ from math import pi as PI
 from math import atan2
 from statistics import mean
 
-
-def calibrate_mag(sec):
+pi = pigpio.pi()
+icm = icm20948.icm20948(pi)
+def calibrate_mag(sec, b, lr):
     Flag = True
     pi.hardware_PWM(12, 50, 75000)
     pi.hardware_PWM(13, 50, 75000)
@@ -21,7 +22,7 @@ def calibrate_mag(sec):
         pi.hardware_PWM(12, 50, 90000)
         try:
             x, y, z = icm.read_magnetometer_data()
-        except　KeyboardInterrupt:
+        except KeyboardInterrupt:
             raise KeyboardInterrupt
         finally:
             pass
@@ -74,6 +75,7 @@ def update_azimuth():
     azimuth = atan2(my-b[1], mx-b[0])*180/PI
 
 
+'''
 try:
     calibrate_mag(30)
     update_azimuth()
@@ -113,3 +115,4 @@ finally:
     pi.hardware_PWM(12, 0, 0)
     pi.hardware_PWM(13, 0, 0)
     pi.stop()
+'''

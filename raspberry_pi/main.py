@@ -1,11 +1,11 @@
 from package import rover_gps as GPS
 from package import dps310
-from package import icm20948 as icm
+from package import icm20948
 from package import ina260
-from package import twelite
+#from package import twelite
 from package import pid_controll
-from package import camera
-from package import capture
+#from package import camera
+#from package import capture
 
 import time
 import pigpio
@@ -14,8 +14,10 @@ import threading
 import toml
 import run
 
+pi = pigpio.pi()
+'''
 def pressure_while(height_threshold, continuous_number, mode): #mode　1：data >= threshold   -1:data <= threshold
-    dps = dps310(pi, 0x77)
+    dps = dps310.dps310(pi, 0x77)
     dps.set_OpMode(opMode.IDLE)
     dps.get_coeffs()
     dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
@@ -35,7 +37,7 @@ toml_dic = toml.load(open('config.toml'))
 
 pressure_while(toml_dic['height']['high'], toml_dic['height']['continue_number'], 1)
 pressure_while(toml_dic['height']['low'], toml_dic['height']['continue_number'], -1)
-
+'''
 cam_dis = 0.003 # ????????????(km)
 forward_dis = 0.01 # ???????(km)
 
@@ -64,7 +66,7 @@ def gps_get():
     flag = 0
     while True:
         now = GPS.lat_long_measurement()
-       if now[0] != None and now[1] != None:
+        if now[0] != None and now[1] != None:
             to_goal[0] = GPS.convert_lat_long_to_r_theta(now[0],now[1],goal_lat,goal_long)[0]
             print(to_goal[0])
 
@@ -77,7 +79,7 @@ def gps_get():
                 flag = 1
             if to_goal[0] < cam_dis:
                 break
-
+'''
 #tv_homing from Noshiro-2019
 Aov = 54 # angle of view
 height = 240
@@ -105,11 +107,9 @@ def update_rotation_with_cam():
         lock.release()
 
         #print(coord[0], rotation)
-
+'''
 try:
-    pi = pigpio.pi()
-
-    run.calibrate_mag(30)
+    run.calibrate_mag(30, b, lr)
     run.update_azimuth()
     run.calc_drift(30)
     
@@ -142,7 +142,7 @@ except KeyboardInterrupt:
 finally:
     pi.hardware_PWM(12, 0, 0)
     pi.hardware_PWM(13, 0, 0)
-
+'''
 #tv_homing
 try:
     URwC_thread = threading.Thread(target=update_rotation_with_cam)
@@ -172,3 +172,4 @@ finally:
     pi.hardware_PWM(pinL, 0, 0)
     pi.hardware_PWM(pinR, 0, 0)
     pi.stop()
+'''
