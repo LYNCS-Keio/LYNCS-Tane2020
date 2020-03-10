@@ -74,23 +74,6 @@ def update_azimuth():
     azimuth = atan2(my-b[1], mx-b[0])*180/PI
 
 
-pi = pigpio.pi()
-
-pi.set_mode(13, pigpio.OUTPUT)
-pi.set_mode(12, pigpio.OUTPUT)
-pi.hardware_PWM(13, 50, 75000)
-pi.hardware_PWM(12, 50, 75000)
-
-
-icm = icm20948.icm20948(pi)
-p = pid_controll.pid(0.002, 0.005, 0.003)
-# mad = madgwick_py.MadgwickAHRS()
-
-b = [30.0, 0.0, 15.0, 20]
-lr = 0.0001
-
-SPEED = 0.7
-
 try:
     calibrate_mag(30)
     update_azimuth()
