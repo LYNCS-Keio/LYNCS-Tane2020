@@ -46,6 +46,13 @@ try:
     run.calibrate_mag(pi, icm, 20, b, lr)
     run.calc_drift(pi, icm, 20, drift)
     azimuth = run.update_azimuth(icm, b)
+
+    while True:
+        pre = gps.lat_long_measurement()
+        if pre[0] != None:
+            break
+    
+    to_goal = gps.convert_lat_long_to_r_theta(pre[0], pre[1], goal_lat, goal_long)
     
     SPEED = 0.7
     pt = time.time()
@@ -63,7 +70,7 @@ try:
         dt = nt - pt
         pt = nt
         azimuth += gz*dt
-        m = p.update_pid(0, azimuth, dt)
+        m = p.update_pid(to_goal[1], azimuth, dt)
 
         m1 = min([max([m, -1]), 1])
 
