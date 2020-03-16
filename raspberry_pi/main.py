@@ -43,11 +43,11 @@ try:
     pi.hardware_PWM(pinL, 50, 75000)
     pi.hardware_PWM(pinR, 50, 75000)
 
-    run.calibrate_mag(pi, icm, 20, b, lr)
-    run.calc_drift(pi, icm, 20, drift)
+    run.calibrate_mag(pi, icm, 30, b, lr)
     azimuth = run.update_azimuth(icm, b)
+    run.calc_drift(pi, icm, 30, drift)
     
-    SPEED = 0.7
+    speed = 0.7
     pt = time.time()
     while True:
         try:
@@ -67,7 +67,7 @@ try:
 
         m1 = min([max([m, -1]), 1])
 
-        dL, dR = 75000 + 12500 * (SPEED - m1), 75000 - 12500 * (SPEED + m1)
+        dL, dR = 75000 + 12500 * (speed - m1), 75000 - 12500 * (speed + m1)
         pi.hardware_PWM(13, 50, int(dL))
         pi.hardware_PWM(12, 50, int(dR))
 
