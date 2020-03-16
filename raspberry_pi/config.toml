@@ -17,6 +17,7 @@ Lmotor = 13
 
 [camera]
 start_distance = 0.003
+Angle_of_Viwe = 54
 
 [gps]
 goal_lat = 0
@@ -24,3 +25,6 @@ goal_long = 0
 
 [icm_calib]
 learning_rate = 0.0001
+
+[state]
+state = 0
