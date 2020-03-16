@@ -19,6 +19,10 @@ icm = icm20948.icm20948(pi)
 toml_dic = toml.load(open('config.toml'))
 p = pid_controll.pid(toml_dic['PID']['P'], toml_dic['PID']['I'], toml_dic['PID']['D'])
 
+threshold_high = toml_dic['height']['high']
+threshold_low = toml_dic['height']['low']
+continuous_number = toml_dic['height']['continue_number']
+
 camera_distance = toml_dic['camera']['start_distance']
 pinL = toml_dic['pin']['Rmotor']
 pinR = toml_dic['pin']['Lmotor']
@@ -28,7 +32,35 @@ lr = toml_dic['icm_calib']['learning_rate']
 b = [30.0, 0.0, 15.0, 20]
 drift = [0,0,0]
 azimuth = 0
-to_goal = [0, 0]
+
+def pressure_while(height_threshold, continuous_number, mode)
+    dps = dps310(pi, 0x77)
+    dps.set_OpMode(opMpde.IDLE)
+    dps.get_coeffs()
+    dps.config_Pressure(mesurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16)
+    dps.config_Temperature(mesurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
+    dps.set_OpMode(opMode.CONT_BOTH)
+
+    n = 0
+    while n < continuous_number:
+        height = dps.measurement_high()
+        if (mode)*height >= (mode)*height_threshold:
+            n += 1
+        else:
+            n = 0
+        time.sleep(0.01)
+
+try:
+    pressure_while(threshold_high, continuous_number, 1)
+    release_time = time.time() # 落下開始
+    pressure_while(threshold_low, continuous_number, -1)
+
+except KeyboardInterrupt:
+    pass        
+
+finally:
+    pi.hardware_PWM(12, 0, 0)
+    pi.hardware_PWM(13, 0, 0)
 
 
 def update_target_gps():
