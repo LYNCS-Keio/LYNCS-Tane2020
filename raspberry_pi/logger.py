@@ -18,10 +18,10 @@ class logger():
     def __init__(self, logging_list, log_dir=None, handler=None, dps_addr=None, icm_addr=None, ina_addr=None):
         if handler == None:
             import pigpio
-            self.handler_ = pigpio.pi()
+            self._handler = pigpio.pi()
             self.own_handler = True
         else:
-            self.handler_ = handler
+            self._handler = handler
             self.own_handler = False
 
 
@@ -37,9 +37,9 @@ class logger():
             if i == logger_list_t.DPS_PRS or i == logger_list_t.DPS_TMP or i == logger_list_t.DPS_HEIGHT and Dps310 == False:
                 from package import dps310
                 if dps_addr == None:
-                    self.dps = dps310.dps310(self.handler_)
+                    self.dps = dps310.dps310(self._handler)
                 else:
-                    self.dps = dps310.dps310(self.handler_, dps_addr)
+                    self.dps = dps310.dps310(self._handler, dps_addr)
                 self.dps.set_OpMode(dps310.opMode.IDLE)
 
                 time.sleep(0.01)
@@ -51,30 +51,30 @@ class logger():
                 Dps310 = True
 
             elif i == logger_list_t.ICM_MAG or i == logger_list_t.ICM_GYRO_ACC and Icm20948 == False and Madgwick == False:
-                self.b = [30.0, 0.0, 15.0, 20]
-                self.lr = 0.0001
                 from package import icm20948
                 if icm_addr == None:
-                    self.icm = icm20948.icm20948(self.handler_)
+                    self.icm = icm20948.icm20948(self._handler)
                 else:
-                    self.icm = icm20948.icm20948(self.handler_, icm_addr)
+                    self.icm = icm20948.icm20948(self._handler, icm_addr)
                 Icm20948 = True
             
             elif i == logger_list_t.ICM_MADGWICK and Madgwick == False:
-                self.b = [30.0, 0.0, 15.0, 20]
-                self.lr = 0.0001
                 from package import icm20948
                 from package import madgwick_py
                 if icm_addr == None:
-                    self.icm = icm20948.icm20948(self.handler_)
+                    self.icm = icm20948.icm20948(self._handler)
                 else:
-                    self.icm = icm20948.icm20948(self.handler_, icm_addr)
+                    self.icm = icm20948.icm20948(self._handler, icm_addr)
                 self.mad = madgwick_py.MadgwickAHRS()
                 Icm20948 = True
                 Madgwick = True
 
             elif i == logger_list_t.INA_CUR or i == logger_list_t.INA_VOL and Ina260 == False:
-                # import ina260
+                from package import ina260
+                if ina_addr == None:
+                    self.ina = ina260.ina260(self._handler)
+                else:
+                    self.ina = ina260.ina260(self._handler, ina_addr)
                 Ina260 = True
 
         if log_dir != None:
@@ -103,18 +103,7 @@ class logger():
                 results.extend(self.icm.read_accelerometer_gyro_data())
             elif i == logger_list_t.ICM_MAG:
                 x, y, z = self.icm.read_magnetometer_data()
-
-                dx = x - self.b[0]
-                dy = y - self.b[1]
-                dz = z - self.b[2]
-                f = dx*dx + dy*dy + dz*dz - self.b[3]*self.b[3]
-                
-                self.b[0] = self.b[0] + 4 * self.lr * f * dx
-                self.b[1] = self.b[1] + 4 * self.lr * f * dy
-                self.b[2] = self.b[2] + 4 * self.lr * f * dz
-                self.b[3] = self.b[3] + 4 * self.lr * f * self.b[3]
-
-                results.extend([x-self.b[0], y-self.b[1], z-self.b[2]])
+                results.extend([x, y, z])
             elif i == logger_list_t.ICM_MADGWICK:
                 ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
                 mx, my, mz = self.icm.read_magnetometer_data()
@@ -125,9 +114,9 @@ class logger():
                 
                 results.extend([x*180/pi,y*180/pi,z*180/pi])
             elif i == logger_list_t.INA_CUR:
-                pass
+                result.append(ina.get_current())
             elif i == logger_list_t.INA_VOL:
-                pass
+                result.append(ina.get_voltage())
 
         return results
 
