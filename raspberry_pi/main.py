@@ -28,13 +28,15 @@ lr = toml_dic['icm_calib']['learning_rate']
 b = [30.0, 0.0, 15.0, 20]
 drift = [0,0,0]
 azimuth = 0
+to_goal = [0, 0]
 
 
 def update_target_gps():
     global to_goal
-    now = gps.lat_long_measurement()
-    if now != [0, 0]:
-        to_goal = gps.convert_lat_long_to_r_theta(*now, *goal)
+    while UPDATE_GPS:
+        now = gps.lat_long_measurement()
+        if now != [0, 0]:
+            to_goal = gps.convert_lat_long_to_r_theta(*now, *goal)
 
 
 try:
@@ -46,6 +48,10 @@ try:
     run.calibrate_mag(pi, icm, 30, b, lr)
     azimuth = run.update_azimuth(icm, b)
     run.calc_drift(pi, icm, 30, drift)
+
+    UPDATE_GPS = True
+    GPS_THREAD = threading.Thread(target=update_target_gps)
+    GPS_THREAD.start()
     
     speed = 0.7
     pt = time.time()
@@ -63,7 +69,7 @@ try:
         dt = nt - pt
         pt = nt
         azimuth += gz*dt
-        m = p.update_pid(0, azimuth, dt)
+        m = p.update_pid(to_goal[1], azimuth, dt)
 
         m1 = min([max([m, -1]), 1])
 
@@ -75,5 +81,6 @@ except KeyboardInterrupt:
     pass        
 
 finally:
+    UPDATE_GPS = False
     pi.hardware_PWM(12, 0, 0)
     pi.hardware_PWM(13, 0, 0)
