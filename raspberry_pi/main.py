@@ -67,7 +67,7 @@ def update_target_gps():
     global to_goal
     while UPDATE_GPS:
         now = gps.lat_long_measurement()
-        if now != [0, 0]:
+        if now != [None, None]:
             to_goal = gps.convert_lat_long_to_r_theta(*now, *goal)
 
 
@@ -82,6 +82,8 @@ try:
     run.calc_drift(pi, icm, 30, drift)
 
     UPDATE_GPS = True
+    update_target_gps()
+    target_azimuth = to_goal[1]
     GPS_THREAD = threading.Thread(target=update_target_gps)
     GPS_THREAD.start()
     
@@ -101,13 +103,16 @@ try:
         dt = nt - pt
         pt = nt
         azimuth += gz*dt
-        m = p.update_pid(to_goal[1], azimuth, dt)
+        m = p.update_pid(target_azimuth, azimuth, dt)
 
         m1 = min([max([m, -1]), 1])
 
         dL, dR = 75000 + 12500 * (speed - m1), 75000 - 12500 * (speed + m1)
         pi.hardware_PWM(13, 50, int(dL))
         pi.hardware_PWM(12, 50, int(dR))
+
+        if to_goal[0] <= camera_distance:
+            break
 
 except KeyboardInterrupt:
     pass        
