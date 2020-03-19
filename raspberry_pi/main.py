@@ -44,7 +44,7 @@ azimuth = 0
 to_goal = [None, None]
 
 
-def pressure_while(height_threshold, continuous_num, timeout, mode)
+def pressure_while(height_threshold, continuous_num, timeout, mode):
     n = 0
     pt = time.time()
     while n < continuous_num:
@@ -99,13 +99,13 @@ try:
     GPS_THREAD.start()
     
 
-    if STATE = 0:        
+    if STATE == 0:        
         pressure_while(THRESHOLD_HIGH, CONTINUOUS_NUM, 300, 1)
         pressure_while(THRESHOLD_LOW, CONTINUOUS_NUM, 300, -1)
         pi.write(26)
     
 
-    elif STATE = 1:
+    elif STATE == 1:
         pt = time.time()
         while True:
             try:
@@ -133,7 +133,7 @@ try:
                 break
 
 
-    elif STATE = 2:
+    elif STATE == 2:
         pt = time.time()
         while True:
             try:
