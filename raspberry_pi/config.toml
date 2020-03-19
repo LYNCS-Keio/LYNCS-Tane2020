@@ -7,21 +7,14 @@ low = 10
 continue_number = 11
 
 [PID]
-<<<<<<< HEAD
-P = 0.002 
-I = 0.005 
-D = 0.003
-=======
 P = 0.004
 I = 0.03
 D = 0.0004
->>>>>>> logger
 
 [pin]
 Rmotor = 12
 Lmotor = 13
 
-<<<<<<< HEAD
 [camera]
 start_distance = 0.003
 Angle_of_Viwe = 54
@@ -35,7 +28,3 @@ learning_rate = 0.0001
 
 [state]
 state = 0
-=======
-[pic]
-
->>>>>>> logger
