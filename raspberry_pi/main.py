@@ -16,16 +16,16 @@ import run
 
 pi = pigpio.pi()
 icm = icm20948.icm20948(pi)
-dps = dps310(pi)
+dps = dps310.dps310(pi)
 toml_dic = toml.load(open('config.toml'))
 p = pid_controll.pid(toml_dic['PID']['P'], toml_dic['PID']['I'], toml_dic['PID']['D'])
 rotation_lock = threading.Lock()
 
-dps.set_OpMode(opMpde.IDLE)
+dps.set_OpMode(dps310.opMode.IDLE)
 dps.get_coeffs()
-dps.config_Pressure(mesurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16)
-dps.config_Temperature(mesurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
-dps.set_OpMode(opMode.CONT_BOTH)
+dps.config_Pressure(dps310.mesurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_16)
+dps.config_Temperature(dps310.mesurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
+dps.set_OpMode(dps310.opMode.CONT_BOTH)
 
 THRESHOLD_HIGH = toml_dic['height']['high']
 THRESHOLD_LOW = toml_dic['height']['low']
