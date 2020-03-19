@@ -99,13 +99,16 @@ try:
     GPS_THREAD.start()
     
 
-    if STATE == 0:        
+    if STATE == 0:
+        """ 気圧センサーによる頂点、落下判定 """        
         pressure_while(THRESHOLD_HIGH, CONTINUOUS_NUM, 300, 1)
         pressure_while(THRESHOLD_LOW, CONTINUOUS_NUM, 300, -1)
-        pi.write(26)
+        # pi.write(26)
     
 
     elif STATE == 1:
+        """ GPS誘導による走行コード """
+        speed = 1
         pt = time.time()
         while True:
             try:
@@ -134,6 +137,7 @@ try:
 
 
     elif STATE == 2:
+        """ 画像誘導による走行 """
         pt = time.time()
         while True:
             try:
