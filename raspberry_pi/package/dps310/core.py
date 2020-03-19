@@ -201,11 +201,7 @@ class dps310():
             raise DPS_STATUS_ERROR
 
     def measure_high(self):
-<<<<<<< HEAD
-        sea_pressure = 1013
-=======
         sea_pressure = 101300
->>>>>>> logger
         recover_T = self.read_Temperature()
         recover_P = self.read_Pressure()
         height = ((((sea_pressure/recover_P)**(1/5.257)) - 1.) * (recover_T + 273.15)) / 0.0065
@@ -214,10 +210,6 @@ class dps310():
 
 if __name__ == "__main__":
     import time
-<<<<<<< HEAD
-    import pigpio
-=======
->>>>>>> logger
     import statistics
     import toml
     pi = pigpio.pi()
@@ -232,11 +224,7 @@ if __name__ == "__main__":
     try:
         while True:
             time.sleep(0.01)
-<<<<<<< HEAD
-            get_data = measure_high()
-=======
             get_data = mesure_high()
->>>>>>> logger
             p_list += get_data[1]
             print(H)
 
