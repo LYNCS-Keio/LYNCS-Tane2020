@@ -20,8 +20,8 @@ start_distance = 0.003
 Angle_of_View = 54
 
 [gps]
-goal_lat = 0
-goal_long = 0
+goal_lat = 35.5546986
+goal_long = 139.6568557
 
 [icm_calib]
 learning_rate = 0.0001

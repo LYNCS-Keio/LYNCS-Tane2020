@@ -27,6 +27,10 @@ dps.config_Pressure(dps310.measurement_conf.MEAS_RATE_16, dps310.measurement_con
 dps.config_Temperature(dps310.measurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
 dps.set_OpMode(dps310.opMode.CONT_BOTH)
 
+#pi.bb_serial_read_close(20)
+pi.write(21, 1)
+gp = gps.gps(pi, 20)
+
 THRESHOLD_HIGH = toml_dic['height']['high']
 THRESHOLD_LOW = toml_dic['height']['low']
 CONTINUOUS_NUM = toml_dic['height']['continue_number']
@@ -59,11 +63,19 @@ def pressure_while(height_threshold, continuous_num, timeout, mode):
 
 
 def update_target_gps():
-    global to_goal
+    global to_goal, UPDATE_GPS
     while UPDATE_GPS:
-        now = gps.lat_long_measurement()
-        if now != [None, None]:
-            to_goal = gps.convert_lat_long_to_r_theta(*now, *goal)
+        while True:
+            try:
+                now = gp.lat_long_measurement()
+            finally:
+                pass
+            print(now)
+            if now != [None, None]:
+                to_goal = gp.convert_lat_long_to_r_theta(*now, *goal)
+                break
+        if once == True:
+            UPDATE_GPS = False
 
 
 def update_rotation_with_cam():
@@ -88,16 +100,19 @@ try:
     pi.hardware_PWM(pinL, 50, 75000)
     pi.hardware_PWM(pinR, 50, 75000)
 
-    run.calibrate_mag(pi, icm, 30, b, lr)
+    run.calibrate_mag(pi, icm, 15, b, lr)
     azimuth = run.update_azimuth(icm, b)
-    run.calc_drift(pi, icm, 30, drift)
+    run.calc_drift(pi, icm, 15, drift)
 
     UPDATE_GPS = True
+    once = True
     update_target_gps()
+    once = False
+    UPDATE_GPS = True
     target_azimuth = to_goal[1]
     GPS_THREAD = threading.Thread(target=update_target_gps)
     GPS_THREAD.start()
-    
+    STATE = 1
 
     if STATE == 0:
         """ 気圧センサーによる頂点、落下判定 """        
@@ -108,6 +123,7 @@ try:
 
     elif STATE == 1:
         """ GPS誘導による走行コード """
+        print("STATE1")
         speed = 1
         pt = time.time()
         while True:
@@ -138,6 +154,7 @@ try:
 
     elif STATE == 2:
         """ 画像誘導による走行 """
+        print("STATE2")
         pt = time.time()
         while True:
             try:
@@ -171,3 +188,4 @@ finally:
     UPDATE_GPS = False
     pi.hardware_PWM(12, 0, 0)
     pi.hardware_PWM(13, 0, 0)
+    pi.bb_serial_read_close(20)
