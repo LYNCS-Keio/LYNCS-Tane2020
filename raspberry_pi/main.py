@@ -3,9 +3,9 @@ from package import dps310
 from package import icm20948
 from package import ina260
 from package import pid_controll
-from package import twelite
-from package import camera
-from package import capture
+# from package import twelite
+# from package import camera
+# from package import capture
 
 import time
 import pigpio
@@ -23,8 +23,8 @@ rotation_lock = threading.Lock()
 
 dps.set_OpMode(dps310.opMode.IDLE)
 dps.get_coeffs()
-dps.config_Pressure(dps310.mesurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_16)
-dps.config_Temperature(dps310.mesurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
+dps.config_Pressure(dps310.measurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_16)
+dps.config_Temperature(dps310.measurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
 dps.set_OpMode(dps310.opMode.CONT_BOTH)
 
 THRESHOLD_HIGH = toml_dic['height']['high']
