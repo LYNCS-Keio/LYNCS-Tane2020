@@ -21,9 +21,8 @@ def calibrate_mag(pi, icm, sec, b, lr):
             raise KeyboardInterrupt
         finally:
             pass
-
-        y,z = -y,-z
-        
+        z = -z
+       
         dx = x - b[0]
         dy = y - b[1]
         dz = z - b[2]
@@ -33,6 +32,7 @@ def calibrate_mag(pi, icm, sec, b, lr):
         b[1] = b[1] + 4 * lr * f * dy
         b[2] = b[2] + 4 * lr * f * dz
         b[3] = b[3] + 4 * lr * f * b[3]
+        #print(b)
         if (time.time() - s_t) > sec:
             Flag = False
     pi.hardware_PWM(12, 50, 75000)
@@ -67,15 +67,25 @@ def calc_drift(pi, icm, sec, drift):
 
 def update_azimuth(icm, b):
     mx, my, mz = icm.read_magnetometer_data()
-    return atan2(my-b[1], mx-b[0])*180/PI
+    return -atan2(my-b[1], mx-b[0])*180/PI
 
 
 if __name__ == '__main__':
     try:
-        calibrate_mag(30)
-        update_azimuth()
-        calc_drift(30)
+        lr = 0.0001
+        b_ = [30, 0, 15, 20]
+        pi = pigpio.pi()
+        icm_ = icm20948.icm20948(pi)
+        print("calibrate")
+        calibrate_mag(pi, icm_, 30, b_, lr)
+        #print(b_)
+        time.sleep(1)
+        while True:
+          print('{:.0f}'.format(update_azimuth(icm_, b_)))
+          time.sleep(0.01)
+        #calc_drift(30)
         
+        """
         pt = time.time()
         while True:
             try:
@@ -102,6 +112,7 @@ if __name__ == '__main__':
             dL, dR = 75000 + 12500 * (SPEED - m1), 75000 - 12500 * (SPEED + m1)
             pi.hardware_PWM(13, 50, int(dL))
             pi.hardware_PWM(12, 50, int(dR))
+            """
 
     except KeyboardInterrupt:
         pass        
