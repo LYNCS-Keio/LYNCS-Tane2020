@@ -28,8 +28,6 @@ dps.config_Temperature(dps310.measurement_conf.MEAS_RATE_32, dps310.measurement_
 dps.set_OpMode(dps310.opMode.CONT_BOTH)
 
 #pi.bb_serial_read_close(20)
-pi.write(21, 1)
-gp = gps.gps(pi, 20)
 
 THRESHOLD_HIGH = toml_dic['height']['high']
 THRESHOLD_LOW = toml_dic['height']['low']
@@ -68,9 +66,14 @@ def update_target_gps():
         while True:
             try:
                 now = gp.lat_long_measurement()
+            except KeyboardInterrupt:
+                UPDATE_GPS = False
+                raise KeyboardInterrupt
+            except:
+                pass
             finally:
                 pass
-            print(now)
+            #print(now)
             if now != [None, None]:
                 to_goal = gp.convert_lat_long_to_r_theta(*now, *goal)
                 break
@@ -95,13 +98,17 @@ def update_rotation_with_cam():
 
 
 try:
+    pi.write(21, 1)
+    gp = gps.gps(pi, 20)
     pi.set_mode(pinL, pigpio.OUTPUT)
     pi.set_mode(pinR, pigpio.OUTPUT)
     pi.hardware_PWM(pinL, 50, 75000)
     pi.hardware_PWM(pinR, 50, 75000)
 
+    print("calibrate")
     run.calibrate_mag(pi, icm, 15, b, lr)
     azimuth = run.update_azimuth(icm, b)
+    print("calc drift")
     run.calc_drift(pi, icm, 15, drift)
 
     UPDATE_GPS = True
@@ -109,7 +116,7 @@ try:
     update_target_gps()
     once = False
     UPDATE_GPS = True
-    target_azimuth = to_goal[1]
+    target_azimuth = to_goal[1]*180/math.pi
     GPS_THREAD = threading.Thread(target=update_target_gps)
     GPS_THREAD.start()
     STATE = 1
@@ -131,15 +138,15 @@ try:
                 ax, ay, az, gx, gy, gz = icm.read_accelerometer_gyro_data()
             except KeyboardInterrupt:
                 raise KeyboardInterrupt
+                break
             except:
                 gz = 0
-            finally:
-                pass
             
             nt = time.time()
             dt = nt - pt
             pt = nt
-            azimuth += gz*dt
+            azimuth -= gz*dt
+            print(target_azimuth, azimuth)
             m = p.update_pid(target_azimuth, azimuth, dt)
 
             m1 = min([max([m, -1]), 1])
@@ -149,6 +156,7 @@ try:
             pi.hardware_PWM(12, 50, int(dR))
 
             if to_goal[0] <= LIMIT_DISTANCE:
+                STATE = 2
                 break
 
 
@@ -161,10 +169,9 @@ try:
                 ax, ay, az, gx, gy, gz = icm.read_accelerometer_gyro_data()
             except KeyboardInterrupt:
                 raise KeyboardInterrupt
+                break
             except:
                 gz = 0
-            finally:
-                pass
             
             nt = time.time()
             dt = nt - pt
@@ -182,7 +189,6 @@ try:
 
 except KeyboardInterrupt:
     pass        
-
 
 finally:
     UPDATE_GPS = False
