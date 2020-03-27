@@ -24,7 +24,6 @@ class logger():
             self._handler = handler
             self.own_handler = False
 
-
         Time = False
         Dps310 = False
         Icm20948 = False
@@ -89,41 +88,42 @@ class logger():
             self.fd.close()
 
     def create_results(self):
-        results = []
+        results = {}
+    
         for i in self.logging_list_:
             if i == logger_list_t.TIMESTAMP:
-                results.append(time.time())
+                results['TIME'] = time.time() 
             elif i == logger_list_t.DPS_PRS:
-                results.append(self.dps.read_Pressure())
+                results['DPS_PRS'] =self.dps.read_Pressure()
             elif i == logger_list_t.DPS_TMP:
-                results.append(self.dps.read_Temperature())
+                results['DPS_TMP'] = self.dps.read_Temperature()
             elif i == logger_list_t.DPS_HEIGHT:
-                results.extend(self.dps.measure_high())
+                data = self.dps.measure_high()
+                results['DPS_HEIGHT'] = data[0]
+                results['DPS_TMP'] = data[1]
+                results['DPS_PRS'] = data[2]
             elif i == logger_list_t.ICM_GYRO_ACC:
-                results.extend(self.icm.read_accelerometer_gyro_data())
+                results['ICM_GYRO_ACC'] = self.icm.read_accelerometer_gyro_data()
             elif i == logger_list_t.ICM_MAG:
-                x, y, z = self.icm.read_magnetometer_data()
-                results.extend([x, y, z])
+                results['ICM_MAG'] = self.icm.read_magnetometer_data()
             elif i == logger_list_t.ICM_MADGWICK:
                 ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
                 mx, my, mz = self.icm.read_magnetometer_data()
                 gx,gy,gz=gx*pi/180,gy*pi/180,gz*pi/180
-
                 self.mad.update([gx,gy,gz],[ax,ay,az],[mx,-my,-mz])
                 x,y,z=self.mad.quaternion.to_euler_angles()
-                
-                results.extend([x*180/pi,y*180/pi,z*180/pi])
+                results['ICM_MADGWICK'] = [x*180/pi,y*180/pi,z*180/pi]
             elif i == logger_list_t.INA_CUR:
-                results.append(self.ina.get_current())
+                results['INA_CUR'] = self.ina.get_current()
             elif i == logger_list_t.INA_VOL:
-                results.append(self.ina.get_voltage())
+                results['INA_VOL'] = self.ina.get_voltage()
 
         return results
 
 
     def csv_logger(self):
         
-        self.wri.writerow(self.create_results())
+        self.wri.writerow((self.create_results()).values())
 
     def printer(self):
         
@@ -142,9 +142,10 @@ if __name__ == "__main__":
     
     try:
         while True:
-            buf = pickle.dumps(logger.create_results())
-            twe.send_binary(list(buf))
-            time.sleep(0.01)
+            # buf = pickle.dumps(logger.create_results())
+            # twe.send_binary(list(buf))
+            # time.sleep(0.01)
+            logger.printer()
     finally:
         pi_.stop()
         del logger
