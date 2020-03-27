@@ -1,5 +1,6 @@
 import pigpio
 
+<<<<<<< HEAD
 """ description
 pigpioを用いたi2c library
 
@@ -9,6 +10,8 @@ pigpioを用いたi2c library
 
 __all__ = ['I2C_FAILED', 'I2C_FAILED_OPEN', 'I2C_FAILED_READING', 'I2C_FAILED_WRITING', 'i2c_bus']
 
+=======
+>>>>>>> twelite
 class _I2C_ERROR(Exception):
     "i2c_bus base error"
 
@@ -57,7 +60,11 @@ class i2c_bus():
 
     def readBytes(self, reg, length):
         try:
+<<<<<<< HEAD
             (ret, val) = self.__pi.i2c_read_i2c_block_data(self.__bus, reg, length)
+=======
+            (ret, val) = self.pi.i2c_read_i2c_block_data(self.bus, reg, length)
+>>>>>>> twelite
             if ret >= 0:
                 int_val = [x for x in val]
             else:
@@ -66,6 +73,7 @@ class i2c_bus():
             raise I2C_FAILED_READING
         else:
             return int_val
+<<<<<<< HEAD
 
     def readWord(self, reg):
         try:
@@ -85,6 +93,8 @@ class i2c_bus():
             raise I2C_FAILED
         else:
             return val
+=======
+>>>>>>> twelite
 
     def writeByte(self, reg, data):
         try:
@@ -103,6 +113,7 @@ class i2c_bus():
             except I2C_FAILED_WRITING:
                 raise I2C_FAILED_WRITING
 
+<<<<<<< HEAD
     def writeBytes(self, reg, data):
         try:
             self.__pi.i2c_write_i2c_block_data(self.__bus, reg, data)
@@ -126,3 +137,7 @@ class i2c_bus():
             except I2C_FAILED_WRITING:
                 raise I2C_FAILED_WRITING
 
+=======
+    def __del__(self):
+        self.pi.i2c_close(self.bus)
+>>>>>>> twelite
