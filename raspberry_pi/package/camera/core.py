@@ -15,6 +15,18 @@ class CamAnalysis:
         pass
 
     def morphology_extract(self, stream):
+        """
+        モルフォロジ変換をする。
+
+        Parameters
+        -------
+        stream : numpy array
+            入力する画像データ。
+
+        Notes
+        -----
+        ノイズを除去します。
+        """
         self.stream = stream
         self.stream_hsv = cv2.cvtColor(self.stream, cv2.COLOR_BGR2HSV)
         # Target Finder
@@ -30,6 +42,16 @@ class CamAnalysis:
         self.mask = cv2.morphologyEx(self.mask, cv2.MORPH_CLOSE, kernel)
 
     def contour_find(self):
+        """
+        輪郭を検出する。
+
+        Retruns
+        -------
+        x, y : float, float
+            面積最大輪郭の重心座標。
+        area : int
+            面積最大輪郭の面積。
+        """
         contours = cv2.findContours(self.mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[1]
         '''
         index of return value is changed depend on the version of opencv
@@ -48,6 +70,9 @@ class CamAnalysis:
             return [x, y, areas[max_area_index]] 
 
     def save_all_outputs(self):
+        """
+        画像を保存する。
+        """
         index = 0
         filename1 = 'bgr2hsv' + '%04d' % index
         while os.path.isfile(current_dir + '/output/' + filename1 + '.png') == True:

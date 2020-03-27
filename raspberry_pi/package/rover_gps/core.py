@@ -6,6 +6,19 @@ from math import radians, atan2, acos, sin, cos, tan
 
 class gps():
     def __init__(self, handler, pin):
+        """
+        GPS取得ライブラリのコンストラクタ。
+        Parameters
+        -------
+        handler : pigpio.pi()
+            pigpioのハンドラー。
+        pin : int
+            RXピンの番号。
+
+        Notes
+        -----
+        RXは任意である。
+        """
         self.__handler = handler
         self.__pin = pin
         self.r = 6378.137  # km
@@ -14,6 +27,14 @@ class gps():
 
 
     def sentence_reader(self):
+        """ 
+        sentenceを取得する。
+        
+        Returns
+        -------
+        sentence : list of char
+            分割された生のセンテンス。
+        """
         count = 1
         se = ""
         while count: # read echoed serial data
@@ -31,7 +52,6 @@ class gps():
     def lat_long_reader(self, sentence):
         """
         sentenceから緯度経度を取得する。
-
 
         Returns
         -------
