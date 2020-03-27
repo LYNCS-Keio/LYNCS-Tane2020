@@ -91,6 +91,16 @@ class dps310():
             self.state = opMode.IDLE
 
     def setup(self, mode, p_rate, p_osr, t_rate, t_osr):
+        """
+        センサーをセットアップする。
+        Parameters
+        -------
+        mode : モード指定。詳しくはデータシート参照。
+        rate : sample rate (Hz)
+        osr  : over sampling rate (Hz)
+        p    : Pressure
+        t    : Temperature
+        """
         try:
             self.set_OpMode(mode)
         except:
@@ -122,6 +132,12 @@ class dps310():
         return data
 
     def set_OpMode(self, mode):
+        """
+        モードの変更。set oprating mode
+        Parameters
+        -------
+        mode : モード番号。詳しくはデータシートを参照。
+        """
         try:
             self.__bus.writeByteBitfield(config_registers.MEAS_CTRL[0], config_registers.MEAS_CTRL[1], config_registers.MEAS_CTRL[2], mode)
         except:
@@ -153,11 +169,10 @@ class dps310():
     def config_Pressure(self, rate, osr):
         """
         気圧取得についての設定。
-
         Parameters
         -------
-        rate : 
-        osr : 
+        rate : sampling rate 
+        osr  : over sampling rate 
         """
         try:
             self.__bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | osr)
@@ -179,11 +194,10 @@ class dps310():
     def config_Temperature(self, rate, osr):
         """
         気温取得についての設定。
-
         Parameters
         -------
-        rate : 
-        osr : 
+        rate : sampling rate 
+        osr  : over sampling rate 
         """
         try:
             self.__bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | osr)

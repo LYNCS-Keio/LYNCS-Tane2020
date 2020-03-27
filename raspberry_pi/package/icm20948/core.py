@@ -80,16 +80,34 @@ class ICM_FAILED_WRITING(_ICM_ERROR):
 
 class icm20948():
     def write(self, reg, value):
-        """Write byte to the sensor."""
+        """
+        センサーのレジスタにデータを書き込む。
+        Parameters
+        -------
+        reg : 書き込むレジスタアドレス
+        value : 書き込むデータ
+        """
         self._bus.writeByte(reg, value)
         time.sleep(0.0001)
 
     def read(self, reg):
-        """Read byte from the sensor."""
+        """
+        センサーから1バイトデータを取得する。
+        Parameters
+        -------
+        reg : 読み込むレジスタアドレス
+        """
         return self._bus.readByte(reg)
 
     def read_bytes(self, reg, length=1):
-        """Read byte(s) from the sensor."""
+        """
+        センサーから長さを指定してデータを取得する。  
+        Parameters
+        -------
+        reg : 読み込むレジスタアドレス
+        length : 読み込むデータの長さ
+                 単位はバイト
+        """
         return self._bus.readBytes(reg, length)
 
     def bank(self, value):
@@ -99,7 +117,13 @@ class icm20948():
             self._bank = value
 
     def mag_write(self, reg, value):
-        """Write a byte to the slave magnetometer."""
+        """
+        地磁気のスレーブにデータを書き込む
+        Parameters
+        -------
+        reg : 書き込むレジスタのアドレス
+        value : 書き込むデータ
+        """
         self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR)  # Write one byte
         self.write(register.ICM20948_I2C_SLV0_REG, reg)
@@ -107,7 +131,16 @@ class icm20948():
         self.bank(0)
 
     def mag_read(self, reg):
-        """Read a byte from the slave magnetometer."""
+        """
+        地磁気のスレーブから1バイトデータを取得する。
+        Parameters
+        -------
+        reg : 読み込むレジスタのアドレス
+
+        Returns
+        -------
+        bytes : 読み込んだデータ
+        """
         self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_CTRL, 0x80 | 1)  # Read 1 byte
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR | 0x80)
@@ -117,7 +150,18 @@ class icm20948():
         return self.read(register.ICM20948_EXT_SLV_SENS_DATA_00)
 
     def mag_read_bytes(self, reg, length=1):
-        """Read up to 24 bytes from the slave magnetometer."""
+        """
+        地磁気のスレーブから指定した長さのデータを取得する。
+        Parameters
+        -------
+        reg : 読み込むレジスタのアドレス
+        length : 読み込むデータの長さ
+            　   単位はバイト
+
+        Returns
+        -------
+        bytes : 読み込んだデータ
+        """
         self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_CTRL, 0x80 | 0x08 | length)
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR | 0x80)
@@ -127,10 +171,27 @@ class icm20948():
         return self.read_bytes(register.ICM20948_EXT_SLV_SENS_DATA_00, length)
 
     def magnetometer_ready(self):
-        """Check the magnetometer status self.ready bit."""
+        """
+        Check the magnetometer status self.ready bit.
+
+        Returns
+        -------
+        bool : 正常な状態であれば0を返す。
+        """
         return self.mag_read(register.AK09916_ST1) & 0x01 > 0
 
     def read_magnetometer_data(self):
+        """
+        地磁気のデータを取得する。
+
+        Returns
+        -------
+        x, y, z, : list of float
+        x : x軸の地磁気
+        y : y軸の地磁気
+        z : z軸の地磁気
+            単位はμﾃｽﾗ
+        """
         self.mag_write(register.AK09916_CNTL2, 0x01)  # Trigger single measurement
         while not self.magnetometer_ready():
             time.sleep(0.00001)
@@ -153,6 +214,15 @@ class icm20948():
         return x, y, z
 
     def read_accelerometer_gyro_data(self):
+        """
+        gyroデータの取得
+
+        Returns
+        -------
+        list of float : 次の順に並んでいる。
+        ax, ay, az : 各軸の加速度 
+        xg, gy, gz : 各軸の重力加速度
+        """
         self.bank(0)
         data = self.read_bytes(register.ICM20948_ACCEL_XOUT_H, 12)
 
@@ -185,7 +255,13 @@ class icm20948():
         return ax, ay, az, gx, gy, gz
 
     def set_accelerometer_sample_rate(self, rate=125):
-        """Set the accelerometer sample rate in Hz."""
+        """
+        加速度データのsample rate を指定する。
+        Parameters
+        -------
+        rate : sample rate
+               単位はHz
+        """
         self.bank(2)
         # 125Hz - 1.125 kHz / (1 + rate)
         rate = int((1125.0 / rate) - 1)
@@ -194,14 +270,24 @@ class icm20948():
         self.write(register.ICM20948_ACCEL_SMPLRT_DIV_2, rate & 0xff)
 
     def set_accelerometer_full_scale(self, scale=16):
-        """Set the accelerometer fulls cale range to +- the supplied value."""
+        """
+        加速度の上限を+-指定された値にする。
+        set the accelerometer fulls cale range to +- the supplied value.
+        """
         self.bank(2)
         value = self.read(register.ICM20948_ACCEL_CONFIG) & 0b11111001
         value |= {2: 0b00, 4: 0b01, 8: 0b10, 16: 0b11}[scale] << 1
         self.write(register.ICM20948_ACCEL_CONFIG, value)
 
     def set_accelerometer_low_pass(self, enabled=True, mode=5):
-        """Configure the accelerometer low pass filter."""
+        """.
+        加速度データのlow pass filter の設定をする。
+        Parameters
+        -------
+        enable : low pass filter を使うかどうか。
+        mode : モード指定。
+               詳しくはデータシートを参照。
+        """
         self.bank(2)
         value = self.read(register.ICM20948_ACCEL_CONFIG) & 0b10001110
         if enabled:
@@ -210,21 +296,37 @@ class icm20948():
         self.write(register.ICM20948_ACCEL_CONFIG, value)
 
     def set_gyro_sample_rate(self, rate=100):
-        """Set the gyro sample rate in Hz."""
+        """
+        gyroデータのsample rate の指定。
+        Parameters
+        -------
+        rate : sample rate
+               
+        """
         self.bank(2)
         # 100Hz sample rate - 1.1 kHz / (1 + rate)
         rate = int((1100.0 / rate) - 1)
         self.write(register.ICM20948_GYRO_SMPLRT_DIV, rate)
 
     def set_gyro_full_scale(self, scale=250):
-        """Set the gyro full scale range to +- supplied value."""
+        """
+        gyroの上限を+-指定された値にする。
+        Set the gyro full scale range to +- supplied value.
+        """
         self.bank(2)
         value = self.read(register.ICM20948_GYRO_CONFIG_1) & 0b11111001
         value |= {250: 0b00, 500: 0b01, 1000: 0b10, 2000: 0b11}[scale] << 1
         self.write(register.ICM20948_GYRO_CONFIG_1, value)
 
     def set_gyro_low_pass(self, enabled=True, mode=5):
-        """Configure the gyro low pass filter."""
+        """.
+        gyroデータのlow pass filter の設定をする。
+        Parameters
+        -------
+        enable : low pass filter を使うかどうか。
+        mode : モード指定。
+               詳しくはデータシートを参照。
+        """
         self.bank(2)
         value = self.read(register.ICM20948_GYRO_CONFIG_1) & 0b10001110
         if enabled:

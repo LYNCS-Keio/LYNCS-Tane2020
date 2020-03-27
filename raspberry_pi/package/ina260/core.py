@@ -45,6 +45,14 @@ class ina260():
 
 
     def get_voltage(self):
+        """
+        電圧を取得する。
+
+        Returns
+        -------
+        vol : float or None
+            　単位はV。つながっていなければNoneを返す。
+        """
         try:
             raw = self.__bus.readBytes(register.BUS_VOL_REG, 2)
         except:
@@ -55,6 +63,14 @@ class ina260():
 
 
     def get_current(self):
+        """
+        電圧を取得する。
+
+        Returns
+        -------
+        current : float or None
+                  単位はA。つながっていなければNoneを返す。
+        """
         try:
             raw = self.__bus.readBytes(register.CURRENT_REG, 2)
         except:
