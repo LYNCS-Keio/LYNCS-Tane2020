@@ -109,12 +109,13 @@ class dps310():
         補数をfloatに直す。
         Parameters
         -------
-        data : data
-        bits : dataのbit長
+        data : int
+        bits : int
+            dataのbit長
 
         Returns
         -------
-        float
+        data : float
         """
         if (data & (1 << (bits -1))):
             data = -(~(data - 1) & (1 << bits) -1)

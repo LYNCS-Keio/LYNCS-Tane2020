@@ -18,6 +18,13 @@ class capture:
         self.camera.start_preview()
     
     def cap(self):
+        """
+        PiCameraで撮影する。
+
+        Returns
+        -------
+        image : jpeg
+        """
         stream = io.BytesIO()
         self.camera.capture(stream, 'jpeg')
         data = np.fromstring(stream.getvalue(), dtype=np.uint8)
@@ -26,6 +33,9 @@ class capture:
         return image
 
     def flush(self):
+        """
+        撮影した画像を保存する。
+        """
         cv2.imwrite(current_dir + '/capture.png', self.stream)
 
     def __del__(self):
