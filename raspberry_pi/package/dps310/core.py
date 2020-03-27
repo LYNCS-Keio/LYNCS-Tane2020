@@ -105,6 +105,17 @@ class dps310():
             raise DPS_FAILED_SETUP
 
     def convert_complement(self, data, bits):
+        """
+        補数をfloatに直す。
+        Parameters
+        -------
+        data : data
+        bits : dataのbit長
+
+        Returns
+        -------
+        float
+        """
         if (data & (1 << (bits -1))):
             data = -(~(data - 1) & (1 << bits) -1)
         return data
@@ -119,6 +130,9 @@ class dps310():
             self.state = mode
 
     def get_coeffs(self):
+        """
+        係数を取得する。
+        """
         try:
             buf = self.__bus.readBytes(data_registers.COEFFS[0], data_registers.COEFFS[1])
         except:
@@ -136,6 +150,14 @@ class dps310():
             self.c30 = self.convert_complement(buf[16] << 8 | buf[17], 16)
 
     def config_Pressure(self, rate, osr):
+        """
+        気圧取得についての設定。
+
+        Parameters
+        -------
+        rate : 
+        osr : 
+        """
         try:
             self.__bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | osr)
         except:
@@ -154,6 +176,14 @@ class dps310():
                 raise DPS_FAILED_WRITING
 
     def config_Temperature(self, rate, osr):
+        """
+        気温取得についての設定。
+
+        Parameters
+        -------
+        rate : 
+        osr : 
+        """
         try:
             self.__bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | osr)
         except:
@@ -172,6 +202,13 @@ class dps310():
                 raise DPS_FAILED_WRITING
 
     def read_Pressure(self):
+        """
+        気圧を取得する。
+
+        Returns
+        -------
+        float : 気圧(hPa)
+        """
         if ((self.state == opMode.CONT_PRS) or (self.state == opMode.CONT_BOTH)) and self.Traw_sc_pre != None:
             try:
                 buf = self.__bus.readBytes(data_registers.PRS[0], data_registers.PRS[1])
@@ -187,6 +224,13 @@ class dps310():
             raise DPS_STATUS_ERROR
 
     def read_Temperature(self):
+        """
+        気温を取得する。
+
+        Returns
+        -------
+        float : 気温(℃)
+        """
         if (self.state == opMode.CONT_TMP) or (self.state == opMode.CONT_BOTH):
             try:
                 buf = self.__bus.readBytes(data_registers.TMP[0], data_registers.TMP[1])
@@ -201,6 +245,17 @@ class dps310():
             raise DPS_STATUS_ERROR
 
     def measure_high(self):
+        """
+        海面からの高度を取得する。
+
+        Returns
+        -------
+        list : list of float
+
+        Notes
+        -----
+        heightの単位はm, recover_Tの単位は℃, recover_Pの単位はhPa。
+        """
         sea_pressure = 101300
         recover_T = self.read_Temperature()
         recover_P = self.read_Pressure()
