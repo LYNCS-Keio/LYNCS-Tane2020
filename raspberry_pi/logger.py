@@ -114,9 +114,9 @@ class logger():
                 
                 results.extend([x*180/pi,y*180/pi,z*180/pi])
             elif i == logger_list_t.INA_CUR:
-                result.append(ina.get_current())
+                results.append(self.ina.get_current())
             elif i == logger_list_t.INA_VOL:
-                result.append(ina.get_voltage())
+                results.append(self.ina.get_voltage())
 
         return results
 
@@ -133,20 +133,18 @@ class logger():
 if __name__ == "__main__":
     import time
     import pigpio
+    import pickle
+    from twelite import serial_send
     pi_ = pigpio.pi()
-    log_list = [logger_list_t.ICM_MAG, logger_list_t.ICM_MADGWICK]
-    logger = logger(log_list, '/home/pi/LYNCS-Tane2020/raspberry_pi/'+ 'log_0' +'.csv')
-    pi_.set_mode(13, pigpio.OUTPUT)
-    pi_.set_mode(12, pigpio.OUTPUT)
-    pi_.hardware_PWM(13, 50, 90000)
-    pi_.hardware_PWM(12, 50, 90000)
+    twe = serial_send.twelite(pi_)
+    log_list = [logger_list_t.TIMESTAMP, logger_list_t.ICM_MAG, logger_list_t.INA_VOL, logger_list_t.DPS_HEIGHT]
+    logger = logger(log_list)
     
     try:
         while True:
-            logger.csv_logger()
+            buf = pickle.dumps(logger.create_results())
+            twe.send_binary(list(buf))
             time.sleep(0.01)
     finally:
-        pi_.hardware_PWM(12, 0, 0)
-        pi_.hardware_PWM(13, 0, 0)
         pi_.stop()
         del logger
