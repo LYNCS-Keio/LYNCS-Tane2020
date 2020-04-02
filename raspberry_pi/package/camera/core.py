@@ -52,12 +52,12 @@ class CamAnalysis:
         area : int
             面積最大輪郭の面積。
         """
-        contours = cv2.findContours(self.mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[1]
+        contours = cv2.findContours(self.mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)[0]
         '''
         index of return value is changed depend on the version of opencv
         '''
-        if len(contours) == 0:
-            return [-1,-1]
+        if len(contours) == 0 :
+            return None
         else:
             areas = list(map(lambda contour: cv2.contourArea(contour), contours))
             max_area_index = areas.index(max(areas))
@@ -65,8 +65,8 @@ class CamAnalysis:
             #    # Find center of gravity
             m = cv2.moments(contours[max_area_index])
             x, y = (m['m10'] / m['m00']), (m['m01'] / m['m00'])
-            cv2.drawContours(self.stream, contours, -1, (255, 255, 255), 2)
-            cv2.circle(self.stream, (int(x), int(y)), 30, (0, 255, 0), 2)
+            cv2.drawContours(self.stream, contours, -1, (255, 255, 255), 5)
+            cv2.circle(self.stream, (int(x), int(y)), 30, (0, 255, 0), 5)
             return [x, y, areas[max_area_index]] 
 
     def save_all_outputs(self):
@@ -91,8 +91,8 @@ class CamAnalysis:
             index += 1
             filename3 = 'contour' + '%04d' % index
         
-        cv2.imwrite(current_dir + '/output/' + filename1 + '.png', self.stream_hsv)
-        cv2.imwrite(current_dir + '/output/' + filename2 + '.png', self.mask)
+        #cv2.imwrite(current_dir + '/output/' + filename1 + '.png', self.stream_hsv)
+        #cv2.imwrite(current_dir + '/output/' + filename2 + '.png', self.mask)
         cv2.imwrite(current_dir + '/output/' + filename3 + '.png', self.stream)
 
 

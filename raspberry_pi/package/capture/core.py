@@ -4,13 +4,11 @@
 import picamera
 import time
 import os
-import io
 import numpy as np
 import cv2
 
 __all__=['capture']
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
 class capture:
     def __init__(self):
         self.camera = picamera.PiCamera()
@@ -23,20 +21,18 @@ class capture:
 
         Returns
         -------
-        image : jpeg
+        stream : jpeg
         """
-        stream = io.BytesIO()
-        self.camera.capture(stream, 'jpeg')
-        data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-        image = cv2.imdecode(data, 1)
-        self.stream = image
-        return image
+        self.stream = np.empty((240, 320, 3), dtype=np.uint8)
+        self.camera.capture(self.stream, 'bgr', use_video_port=True)
+        return self.stream
 
     def flush(self):
         """
         撮影した画像を保存する。
         """
-        cv2.imwrite(current_dir + '/capture.png', self.stream)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        cv2.imwrite(current_dir + '/capture.jpg', self.stream)
 
     def __del__(self):
         self.camera.stop_preview()
