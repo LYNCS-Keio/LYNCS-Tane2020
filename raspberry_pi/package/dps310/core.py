@@ -102,10 +102,6 @@ class dps310():
         t    : Temperature
         """
         try:
-            self.set_OpMode(mode)
-        except:
-            raise DPS_FAILED_SETUP
-        try:
             self.config_Pressure(p_rate, p_osr)
         except:
             raise DPS_FAILED_SETUP
@@ -113,6 +109,13 @@ class dps310():
             self.config_Temperature(t_rate, t_osr)
         except:
             raise DPS_FAILED_SETUP
+        try:
+            self.set_OpMode(mode)
+        except:
+            raise DPS_FAILED_SETUP
+
+        self.get_coeffs()
+        self.read_Temperature()
 
     def convert_complement(self, data, bits):
         """
@@ -284,20 +287,11 @@ if __name__ == "__main__":
     import toml
     pi = pigpio.pi()
     dps = dps310(pi, 0x77)
-    dps.set_OpMode(opMode.IDLE)
-    dps.get_coeffs()
-    dps.config_Pressure(measurement_conf.MEAS_RATE_16,measurement_conf.MEAS_RATE_16)
-    dps.config_Temperature(measurement_conf.MEAS_RATE_32, measurement_conf.MEAS_RATE_32)
-    dps.set_OpMode(opMode.CONT_BOTH)
+    dps.setup(opMode.CONT_BOTH, measurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16, measurement_conf.MEAS_RATE_16)
 
-    p_list = []
     try:
         while True:
             time.sleep(0.01)
-            get_data = mesure_high()
-            p_list += get_data[1]
-            print(H)
-
+            print(dps.measure_high())
     finally:
-        median = statistics.median(p_list)
-        print(madian)
+        pass
