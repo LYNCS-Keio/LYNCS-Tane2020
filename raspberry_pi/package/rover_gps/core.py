@@ -93,7 +93,7 @@ class gps():
 
     def lat_long_measurement(self):
         """
-        GPSを用いて緯度経度を取得する。
+        GNSSを用いて緯度経度を取得する。
 
         Returns
         -------
@@ -106,14 +106,38 @@ class gps():
             for i in range(len(sentence)):
                 #print(sentence[i])
                 if sentence[i][3:6] == 'GGA' or sentence[i][3:6] == 'RMC' or sentence[i][3:6] == 'GLL':
-                    lat_and_long = self.lat_long_reader(sentence[i])
-                    flag = False
+                    try:
+                        lat_and_long = self.lat_long_reader(sentence[i])
+                    except:
+                        pass
+                    else:
+                        flag = False
         return [lat_and_long[0], lat_and_long[1]]
+    
+
+    def read_all_infomation(self):
+        """
+        GNSSセンテンスをパースする
+
+        Returns
+        -------
+        pynmea2.types
+            pynmea2のmessageインスタンス
+
+        Notes
+        -----
+        参考 : https://github.com/Knio/pynmea2
+        """
+        flag = True
+        while flag:
+            sentence = self.sentence_reader()
+            for i in range(len(sentence)):
+                try:
 
 
     def velocity_measurement(self):
         """
-        GPSから速度を取得する。
+        GNSSから速度を取得する。
 
         Returns
         -------
@@ -124,12 +148,20 @@ class gps():
         -----
         speedの単位はknot, courseの単位は度である。
         """
-        sentence = self.sentence_reader()
-
-        for i in range(len(sentence)):
-            if sentence[0] == '$' and ('RMC' in sentence):
-                gps_data = velocity_reader(sentence)
-                return [gps_data[0], gps_data[1]]
+        flag = True
+        while flag:
+            sentence = self.sentence_reader()
+            for i in range(len(sentence)):
+                #print(sentence[i])
+                if sentence[i][3:6] == 'RMC':
+                    try:
+                        gps_data = self.velocity_reader(sentence[i])
+                    except:
+                        pass
+                    else:
+                        flag = False
+        return [gps_data[0], gps_data[1]]
+        
 
 
     def convert_lat_long_to_r_theta(self, lat0, long0, lat1, long1):
@@ -168,7 +200,7 @@ class gps():
 
     def r_theta_to_goal(self, goal_lat, goal_long):
         """
-        GPSから目的地までの距離と方位角を取得する。
+        GNSSから目的地までの距離と方位角を取得する。
 
         Parameters
         -------

@@ -42,10 +42,7 @@ class logger():
                 self.dps.set_OpMode(dps310.opMode.IDLE)
 
                 time.sleep(0.01)
-                self.dps.get_coeffs()
-                self.dps.config_Pressure(dps310.measurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_16)
-                self.dps.config_Temperature(dps310.measurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
-                self.dps.set_OpMode(dps310.opMode.CONT_BOTH)
+                self.dps.setup(dps310.opMode.CONT_BOTH, dps310.measurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_16, dps310.measurement_conf.MEAS_RATE_32, dps310.measurement_conf.MEAS_RATE_32)
                 self.dps.read_Temperature()
                 Dps310 = True
 
@@ -87,47 +84,72 @@ class logger():
         if self.fd != None:
             self.fd.close()
 
-    def create_results(self):
-        results = {}
-    
+
+    def update_results(self):
         for i in self.logging_list_:
             if i == logger_list_t.TIMESTAMP:
-                results['TIME'] = time.time() 
+                self.time = time.time() 
             elif i == logger_list_t.DPS_PRS:
-                results['DPS_PRS'] =self.dps.read_Pressure()
+                self.dps_prs =self.dps.read_Pressure()
             elif i == logger_list_t.DPS_TMP:
-                results['DPS_TMP'] = self.dps.read_Temperature()
+                self.dps_tmp = self.dps.read_Temperature()
             elif i == logger_list_t.DPS_HEIGHT:
                 data = self.dps.measure_high()
-                results['DPS_HEIGHT'] = data[0]
-                results['DPS_TMP'] = data[1]
-                results['DPS_PRS'] = data[2]
+                self.dps_height = data[0]
+                self.dps_tmp = data[1]
+                self.dps_prs = data[2]
             elif i == logger_list_t.ICM_GYRO_ACC:
-                results['ICM_GYRO_ACC'] = self.icm.read_accelerometer_gyro_data()
+                self.icm_gyro_acc = self.icm.read_accelerometer_gyro_data()
             elif i == logger_list_t.ICM_MAG:
-                results['ICM_MAG'] = self.icm.read_magnetometer_data()
+                self.icm_mag = self.icm.read_magnetometer_data()
             elif i == logger_list_t.ICM_MADGWICK:
                 ax, ay, az, gx, gy, gz = self.icm.read_accelerometer_gyro_data()
                 mx, my, mz = self.icm.read_magnetometer_data()
                 gx,gy,gz=gx*pi/180,gy*pi/180,gz*pi/180
                 self.mad.update([gx,gy,gz],[ax,ay,az],[mx,-my,-mz])
                 x,y,z=self.mad.quaternion.to_euler_angles()
-                results['ICM_MADGWICK'] = [x*180/pi,y*180/pi,z*180/pi]
+                self.icm_madgwick = [x*180/pi,y*180/pi,z*180/pi]
             elif i == logger_list_t.INA_CUR:
-                results['INA_CUR'] = self.ina.get_current()
+                self.ina_cur = self.ina.get_current()
             elif i == logger_list_t.INA_VOL:
-                results['INA_VOL'] = self.ina.get_voltage()
+                self.ina_vol = self.ina.get_voltage()
+
+
+    def create_dict(self):
+        results = {}
+    
+        for i in self.logging_list_:
+            if i == logger_list_t.TIMESTAMP:
+                results['TIME'] = self.time 
+            elif i == logger_list_t.DPS_PRS:
+                results['DPS_PRS'] = self.dps_prs
+            elif i == logger_list_t.DPS_TMP:
+                results['DPS_TMP'] = self.dps_tmp
+            elif i == logger_list_t.DPS_HEIGHT:
+                results['DPS_HEIGHT'] = self.dps_height
+                results['DPS_TMP'] = self.dps_tmp
+                results['DPS_PRS'] = self.dps_prs
+            elif i == logger_list_t.ICM_GYRO_ACC:
+                results['ICM_GYRO_ACC'] = self.icm_gyro_acc
+            elif i == logger_list_t.ICM_MAG:
+                results['ICM_MAG'] = self.icm_mag
+            elif i == logger_list_t.ICM_MADGWICK:
+                results['ICM_MADGWICK'] = self.icm_madgwick
+            elif i == logger_list_t.INA_CUR:
+                results['INA_CUR'] = self.ina_cur
+            elif i == logger_list_t.INA_VOL:
+                results['INA_VOL'] = self.ina_vol
 
         return results
 
 
     def csv_logger(self):
-        
-        self.wri.writerow((self.create_results()).values())
+        self.update_results()
+        self.wri.writerow((self.create_dict()).values())
 
     def printer(self):
-        
-        print(self.create_results())
+        self.update_results()
+        print(self.create_dict())
 
 
 if __name__ == "__main__":

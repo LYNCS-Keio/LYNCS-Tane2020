@@ -26,7 +26,7 @@ class I2C_FAILED_WRITING(_I2C_ERROR):
 
 
 class i2c_bus():
-    def __init__(self, handler, addr):
+    def _init_(self, handler, addr):
         """ 
         i2cバスのコンストラクタ
 
@@ -37,10 +37,10 @@ class i2c_bus():
         addr : int
             デバイスのアドレス。
         """
-        self.__pi = handler
-        self.__addr = addr
+        self._pi = handler
+        self._addr = addr
         try:
-            self.__bus = self.__pi.i2c_open(1, self.__addr)
+            self._bus = self._pi.i2c_open(1, self._addr)
         except TypeError:
             raise TypeError
         except:
@@ -61,7 +61,7 @@ class i2c_bus():
             読み込んだデータ。
         """
         try:
-            val = self.__pi.i2c_read_byte_data(self.__bus, reg)
+            val = self._pi.i2c_read_byte_data(self._bus, reg)
         except:
             raise I2C_FAILED_READING
         else:
@@ -116,7 +116,7 @@ class i2c_bus():
             読み込んだデータ。
         """
         try:
-            (ret, val) = self.__pi.i2c_read_i2c_block_data(self.__bus, reg, length)
+            (ret, val) = self._pi.i2c_read_i2c_block_data(self._bus, reg, length)
             if ret >= 0:
                 int_val = [x for x in val]
             else:
@@ -141,7 +141,7 @@ class i2c_bus():
             読み込んだデータ。
         """
         try:
-            val = self.__pi.i2c_read_word_data(self.__bus, reg)
+            val = self._pi.i2c_read_word_data(self._bus, reg)
         except:
             raise I2C_FAILED_READING
         else:
@@ -187,7 +187,7 @@ class i2c_bus():
             書き込むデータ。
         """
         try:
-            self.__pi.i2c_write_byte_data(self.__bus, reg, data)
+            self._pi.i2c_write_byte_data(self._bus, reg, data)
         except:
             raise I2C_FAILED_WRITING
 
@@ -228,7 +228,7 @@ class i2c_bus():
             書き込むデータ。
         """
         try:
-            self.__pi.i2c_write_i2c_block_data(self.__bus, reg, data)
+            self._pi.i2c_write_i2c_block_data(self._bus, reg, data)
         except:
             raise I2C_FAILED_WRITING
 
@@ -244,7 +244,7 @@ class i2c_bus():
             書き込むデータ。
         """
         try:
-            self.__pi.i2c_write_word_data(self.__bus, reg, data)
+            self._pi.i2c_write_word_data(self._bus, reg, data)
         except:
             raise I2C_FAILED_WRITING
 

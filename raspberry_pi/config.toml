@@ -17,7 +17,6 @@ Lmotor = 13
 
 [camera]
 start_distance = 0.003
-Angle_of_View = 54
 
 [gps]
 goal_lat = 35.5546986
