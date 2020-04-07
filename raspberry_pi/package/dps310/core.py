@@ -83,7 +83,7 @@ class dps310():
         self.p_osr = None; self.p_rate = None; self.t_osr = None; self.t_rate = None; self.Traw_sc_pre = None
 
         try:
-            self.__bus = i2c_bus(handler, self.addr)
+            self._bus = i2c_bus(handler, self.addr)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_INIT
@@ -142,7 +142,7 @@ class dps310():
         mode : モード番号。詳しくはデータシートを参照。
         """
         try:
-            self.__bus.writeByteBitfield(config_registers.MEAS_CTRL[0], config_registers.MEAS_CTRL[1], config_registers.MEAS_CTRL[2], mode)
+            self._bus.writeByteBitfield(config_registers.MEAS_CTRL[0], config_registers.MEAS_CTRL[1], config_registers.MEAS_CTRL[2], mode)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_WRITING
@@ -154,7 +154,7 @@ class dps310():
         係数を取得する。
         """
         try:
-            buf = self.__bus.readBytes(data_registers.COEFFS[0], data_registers.COEFFS[1])
+            buf = self._bus.readBytes(data_registers.COEFFS[0], data_registers.COEFFS[1])
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_READING
@@ -178,7 +178,7 @@ class dps310():
         osr  : over sampling rate 
         """
         try:
-            self.__bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | osr)
+            self._bus.writeByteBitfield(config_registers.PRS_CONF[0], config_registers.PRS_CONF[1], config_registers.PRS_CONF[2], rate << 4 | osr)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_WRITING
@@ -187,9 +187,9 @@ class dps310():
             self.p_rate = rate
             try:
                 if osr > measurement_conf.MEAS_RATE_8:
-                    self.__bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 1)
+                    self._bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 1)
                 else:
-                    self.__bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 0)
+                    self._bus.writeByteBitfield(registers.PRS_SE[0], registers.PRS_SE[1], registers.PRS_SE[2], 0)
             except:
                 self.state = opMode.ERR
                 raise DPS_FAILED_WRITING
@@ -203,7 +203,7 @@ class dps310():
         osr  : over sampling rate 
         """
         try:
-            self.__bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | osr)
+            self._bus.writeByteBitfield(config_registers.TMP_CONF[0], config_registers.TMP_CONF[1], config_registers.TMP_CONF[2], rate << 4 | osr)
         except:
             self.state = opMode.ERR
             raise DPS_FAILED_WRITING
@@ -212,9 +212,9 @@ class dps310():
             self.t_rate = rate
             try:
                 if osr > measurement_conf.MEAS_RATE_8:
-                    self.__bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 1)
+                    self._bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 1)
                 else:
-                    self.__bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 0)
+                    self._bus.writeByteBitfield(registers.TMP_SE[0], registers.TMP_SE[1], registers.TMP_SE[2], 0)
             except:
                 self.state = opMode.ERR
                 raise DPS_FAILED_WRITING
@@ -229,7 +229,7 @@ class dps310():
         """
         if ((self.state == opMode.CONT_PRS) or (self.state == opMode.CONT_BOTH)) and self.Traw_sc_pre != None:
             try:
-                buf = self.__bus.readBytes(data_registers.PRS[0], data_registers.PRS[1])
+                buf = self._bus.readBytes(data_registers.PRS[0], data_registers.PRS[1])
             except:
                 raise DPS_FAILED_READING
             else:
@@ -251,7 +251,7 @@ class dps310():
         """
         if (self.state == opMode.CONT_TMP) or (self.state == opMode.CONT_BOTH):
             try:
-                buf = self.__bus.readBytes(data_registers.TMP[0], data_registers.TMP[1])
+                buf = self._bus.readBytes(data_registers.TMP[0], data_registers.TMP[1])
             except:
                 raise DPS_FAILED_READING
             else:
