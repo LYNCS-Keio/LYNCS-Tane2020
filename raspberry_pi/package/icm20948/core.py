@@ -21,7 +21,7 @@ class register():
     ICM20948_PWR_MGMT_2             = [0x07, 0]
     ICM20948_INT_PIN_CFG            = [0x0F, 0]
     ICM20948_ACCEL_XOUT_H           = [0x2D, 0]
-    ICM20948_GRYO_XOUT_H            = [0x33, 0]
+    ICM20948_GYRO_XOUT_H            = [0x33, 0]
     ICM20948_EXT_SLV_SENS_DATA_00   = [0x3B, 0]
     
     # bank 1
@@ -85,7 +85,7 @@ class ICM_FAILED_WRITING(_ICM_ERROR):
     "Failed writing data on the icm20948"
 
 class icm20948():
-    def write(self, reg, value):
+    def write(self, reg, value, no_check=False):
         """
         センサーのレジスタにデータを書き込む。
         Parameters
@@ -94,17 +94,19 @@ class icm20948():
             書き込むレジスタアドレス, listの場合bank番号を含む
         value : int
             書き込むデータ
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """
         if isinstance(reg, int):
-            self._bus.writeByte(reg, value)
+            self._bus.writeByte(reg, value, no_check)
         elif isinstance(reg, list):
             self.bank(reg[1])
-            self._bus.writeByte(reg[0], value)
+            self._bus.writeByte(reg[0], value, no_check)
         else:
             raise ICM_FAILED_WRITING
         time.sleep(0.0001)
 
-    def _writeByteBitfield(self, reg, mask, shift, data):
+    def _writeByteBitfield(self, reg, mask, shift, data, no_check=False):
         """
         レジスタの一部だけに書き込む。
 
@@ -118,12 +120,14 @@ class icm20948():
             マスクしたデータのビットシフト数。
         data : int
             書き込むデータ。
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """
         if isinstance(reg, int):
-            self._bus.writeByteBitfield(reg, mask, shift, data)
+            self._bus.writeByteBitfield(reg, mask, shift, data, no_check)
         elif isinstance(reg, list):
             self.bank(reg[1])
-            self._bus.writeByteBitfield(reg[0], mask, shift, data)
+            self._bus.writeByteBitfield(reg[0], mask, shift, data, no_check)
         else:
             raise ICM_FAILED_WRITING
         time.sleep(0.0001)
@@ -261,44 +265,64 @@ class icm20948():
 
         return x, y, z
 
-    def read_accelerometer_gyro_data(self):
+    def read_accelerometer_data(self):
         """
-        gyroデータの取得
+        加速度データの取得
 
         Returns
         -------
         list of float : 次の順に並んでいる。
         ax, ay, az : 各軸の加速度 
-        xg, gy, gz : 各軸の重力加速度
         """
-        data = self.read_bytes(register.ICM20948_ACCEL_XOUT_H, 12)
+        if self.accelerometer == False:
+            return 0, 0, 0
+        else:
+            data = self.read_bytes(register.ICM20948_ACCEL_XOUT_H, 6)
 
-        ax, ay, az, gx, gy, gz = struct.unpack(">hhhhhh", bytearray(data))
+            ax, ay, az = struct.unpack(">hhh", bytearray(data))
+
+            # Read accelerometer full scale range and
+            # use it to compensate the self.reading to gs
+            scale = (self.read(register.ICM20948_ACCEL_CONFIG) & 0x06) >> 1
+
+            # scale ranges from section 3.2 of the datasheet
+            gs = [16384.0, 8192.0, 4096.0, 2048.0][scale]
+
+            ax /= gs
+            ay /= gs
+            az /= gs
+
+            return ax, ay, az
+
+    def read_gyro_data(self):
+        """
+        角速度データの取得
+
+        Returns
+        -------
+        list of float : 次の順に並んでいる。
+        gx, gy, gz : 各軸の角速度
+        """
+        if self.gyro == False:
+            return 0, 0, 0
+        else:
+            data = self.read_bytes(register.ICM20948_GYRO_XOUT_H, 6)
+
+            gx, gy, gz = struct.unpack(">hhh", bytearray(data))
 
 
-        # Read accelerometer full scale range and
-        # use it to compensate the self.reading to gs
-        scale = (self.read(register.ICM20948_ACCEL_CONFIG) & 0x06) >> 1
+            # Read back the degrees per second rate and
+            # use it to compensate the self.reading to dps
+            scale = (self.read(register.ICM20948_GYRO_CONFIG_1) & 0x06) >> 1
 
-        # scale ranges from section 3.2 of the datasheet
-        gs = [16384.0, 8192.0, 4096.0, 2048.0][scale]
+            # scale ranges from section 3.1 of the datasheet
+            dps = [131, 65.5, 32.8, 16.4][scale]
 
-        ax /= gs
-        ay /= gs
-        az /= gs
+            gx /= dps
+            gy /= dps
+            gz /= dps
 
-        # Read back the degrees per second rate and
-        # use it to compensate the self.reading to dps
-        scale = (self.read(register.ICM20948_GYRO_CONFIG_1) & 0x06) >> 1
-
-        # scale ranges from section 3.1 of the datasheet
-        dps = [131, 65.5, 32.8, 16.4][scale]
-
-        gx /= dps
-        gy /= dps
-        gz /= dps
-
-        return ax, ay, az, gx, gy, gz
+            return gx, gy, gz
 
     def set_accelerometer_sample_rate(self, rate=125):
         """
@@ -469,17 +493,19 @@ class icm20948():
         """
         try:
             if self.accelerometer_lowpower or self.gyro_lowpower:
-                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b1)
-                self.circuit_lowpower = False
+                if self.circuit_lowpower == False:
+                    self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b1)
+                    self.circuit_lowpower = True
             else:
-                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b0)
-                self.circuit_lowpower = True
+                if self.circuit_lowpower == True:
+                    self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b0)
+                    self.circuit_lowpower = False
         except:
             raise ICM_FAILED_SETUP
 
     def reset_device(self):
         try:
-            self.write(register.ICM20948_PWR_MGMT_1, 0x80)
+            self.write(register.ICM20948_PWR_MGMT_1, 0x80, no_check=True)
         except:
             raise ICM_FAILED_SETUP
 
@@ -504,6 +530,7 @@ class icm20948():
 
         try:
             self.reset_device()
+            time.sleep(0.05)
             self.write(register.ICM20948_PWR_MGMT_1, 0x01) # clock select
 
             self.set_device_awake()
@@ -541,7 +568,8 @@ if __name__ == "__main__":
 
     while True:
         x, y, z = imu.read_magnetometer_data()
-        ax, ay, az, gx, gy, gz = imu.read_accelerometer_gyro_data()
+        ax, ay, az = imu.read_accelerometer_data()
+        gx, gy, gz = imu.read_gyro_data() 
 
         print("""
 Accel: {:05.2f} {:05.2f} {:05.2f}
