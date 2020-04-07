@@ -6,40 +6,46 @@ from i2c_bus import *
 import time
 import struct
 
-class register():
+class constant():
     CHIP_ID                         = 0xEA
-    I2C_ADDR                        = 0x68
     I2C_ADDR_ALT                    = 0x69
+    I2C_ADDR                        = 0x68
+
+class register():
     ICM20948_BANK_SEL               = 0x7f
+    # bank 0
+    ICM20948_WHO_AM_I               = [0x00, 0]
+    ICM20948_USER_CTRL              = [0x03, 0]
+    ICM20948_LP_CONFIG              = [0x05, 0]
+    ICM20948_PWR_MGMT_1             = [0x06, 0]
+    ICM20948_PWR_MGMT_2             = [0x07, 0]
+    ICM20948_INT_PIN_CFG            = [0x0F, 0]
+    ICM20948_ACCEL_XOUT_H           = [0x2D, 0]
+    ICM20948_GRYO_XOUT_H            = [0x33, 0]
+    ICM20948_EXT_SLV_SENS_DATA_00   = [0x3B, 0]
+    
+    # bank 1
+    
+    # bank 2
+    ICM20948_GYRO_SMPLRT_DIV        = [0x00, 2]
+    ICM20948_GYRO_CONFIG_1          = [0x01, 2]
+    ICM20948_GYRO_CONFIG_2          = [0x02, 2]
+    ICM20948_ACCEL_SMPLRT_DIV_1     = [0x10, 2]
+    ICM20948_ACCEL_SMPLRT_DIV_2     = [0x11, 2]
+    ICM20948_ACCEL_INTEL_CTRL       = [0x12, 2]
+    ICM20948_ACCEL_WOM_THR          = [0x13, 2]
+    ICM20948_ACCEL_CONFIG           = [0x14, 2]
 
-    ICM20948_I2C_MST_ODR_CONFIG     = 0x00
-    ICM20948_I2C_MST_CTRL           = 0x01
-    ICM20948_I2C_MST_DELAY_CTRL     = 0x02
-    ICM20948_I2C_SLV0_ADDR          = 0x03
-    ICM20948_I2C_SLV0_REG           = 0x04
-    ICM20948_I2C_SLV0_CTRL          = 0x05
-    ICM20948_I2C_SLV0_DO            = 0x06
-    ICM20948_EXT_SLV_SENS_DATA_00   = 0x3B
+    # bank 3
+    ICM20948_I2C_MST_ODR_CONFIG     = [0x00, 3]
+    ICM20948_I2C_MST_CTRL           = [0x01, 3]
+    ICM20948_I2C_MST_DELAY_CTRL     = [0x02, 3]
+    ICM20948_I2C_SLV0_ADDR          = [0x03, 3]
+    ICM20948_I2C_SLV0_REG           = [0x04, 3]
+    ICM20948_I2C_SLV0_CTRL          = [0x05, 3]
+    ICM20948_I2C_SLV0_DO            = [0x06, 3]
 
-    ICM20948_GYRO_SMPLRT_DIV        = 0x00
-    ICM20948_GYRO_CONFIG_1          = 0x01
-    ICM20948_GYRO_CONFIG_2          = 0x02
-
-    # Bank 0
-    ICM20948_WHO_AM_I               = 0x00
-    ICM20948_USER_CTRL              = 0x03
-    ICM20948_PWR_MGMT_1             = 0x06
-    ICM20948_PWR_MGMT_2             = 0x07
-    ICM20948_INT_PIN_CFG            = 0x0F
-
-    ICM20948_ACCEL_SMPLRT_DIV_1     = 0x10
-    ICM20948_ACCEL_SMPLRT_DIV_2     = 0x11
-    ICM20948_ACCEL_INTEL_CTRL       = 0x12
-    ICM20948_ACCEL_WOM_THR          = 0x13
-    ICM20948_ACCEL_CONFIG           = 0x14
-    ICM20948_ACCEL_XOUT_H           = 0x2D
-    ICM20948_GRYO_XOUT_H            = 0x33
-
+    # AK09916
     AK09916_I2C_ADDR                = 0x0c
     AK09916_CHIP_ID                 = 0x09
     AK09916_WIA                     = 0x01
@@ -84,34 +90,79 @@ class icm20948():
         センサーのレジスタにデータを書き込む。
         Parameters
         -------
-        reg : 書き込むレジスタアドレス
-        value : 書き込むデータ
+        reg : list or int
+            書き込むレジスタアドレス, listの場合bank番号を含む
+        value : int
+            書き込むデータ
         """
-        self._bus.writeByte(reg, value)
+        if isinstance(reg, int):
+            self._bus.writeByte(reg, value)
+        elif isinstance(reg, list):
+            self.bank(reg[1])
+            self._bus.writeByte(reg[0], value)
+        else:
+            raise ICM_FAILED_WRITING
         time.sleep(0.0001)
+
+    def _writeByteBitfield(self, reg, mask, shift, data):
+        """
+        レジスタの一部だけに書き込む。
+
+        Parameters
+        -------
+        reg : int
+            書き込むレジスタアドレス, listの場合bank番号を含む
+        mask : int
+            レジスタ内での目的データのマスク。
+        shift : int
+            マスクしたデータのビットシフト数。
+        data : int
+            書き込むデータ。
+        """
+        if isinstance(reg, int):
+            self._bus.writeByteBitfield(reg, mask, shift, data)
+        elif isinstance(reg, list):
+            self.bank(reg[1])
+            self._bus.writeByteBitfield(reg[0], mask, shift, data)
+        else:
+            raise ICM_FAILED_WRITING
+        time.sleep(0.0001)
+
 
     def read(self, reg):
         """
         センサーから1バイトデータを取得する。
         Parameters
         -------
-        reg : 読み込むレジスタアドレス
+        reg : int or list
+            読み込むレジスタアドレス, listの場合はbank番号を含む
         """
-        return self._bus.readByte(reg)
+        if isinstance(reg, int):
+            return self._bus.readByte(reg)
+        elif isinstance(reg, list):
+            self.bank(reg[1])
+            return self._bus.readByte(reg[0])
+        else:
+            raise ICM_FAILED_READING
 
     def read_bytes(self, reg, length=1):
         """
         センサーから長さを指定してデータを取得する。  
         Parameters
         -------
-        reg : 読み込むレジスタアドレス
-        length : 読み込むデータの長さ
-                 単位はバイト
+        reg : int or list
+            読み込むレジスタアドレス, listの場合はbank番号を含む
+        length : int
+            読み込むデータの長さ (bytes)
         """
-        return self._bus.readBytes(reg, length)
+        if isinstance(reg, int):
+            return self._bus.readBytes(reg, length)
+        elif isinstance(reg, list):
+            self.bank(reg[1])
+            return self._bus.readBytes(reg[0], length)
 
     def bank(self, value):
-        """Switch register self.bank."""
+        """Switch register user bank"""
         if not self._bank == value:
             self.write(register.ICM20948_BANK_SEL, value << 4)
             self._bank = value
@@ -124,7 +175,6 @@ class icm20948():
         reg : 書き込むレジスタのアドレス
         value : 書き込むデータ
         """
-        self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR)  # Write one byte
         self.write(register.ICM20948_I2C_SLV0_REG, reg)
         self.write(register.ICM20948_I2C_SLV0_DO, value)
@@ -141,7 +191,6 @@ class icm20948():
         -------
         bytes : 読み込んだデータ
         """
-        self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_CTRL, 0x80 | 1)  # Read 1 byte
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR | 0x80)
         self.write(register.ICM20948_I2C_SLV0_REG, reg)
@@ -162,7 +211,6 @@ class icm20948():
         -------
         bytes : 読み込んだデータ
         """
-        self.bank(3)
         self.write(register.ICM20948_I2C_SLV0_CTRL, 0x80 | 0x08 | length)
         self.write(register.ICM20948_I2C_SLV0_ADDR, register.AK09916_I2C_ADDR | 0x80)
         self.write(register.ICM20948_I2C_SLV0_REG, reg)
@@ -223,12 +271,10 @@ class icm20948():
         ax, ay, az : 各軸の加速度 
         xg, gy, gz : 各軸の重力加速度
         """
-        self.bank(0)
         data = self.read_bytes(register.ICM20948_ACCEL_XOUT_H, 12)
 
         ax, ay, az, gx, gy, gz = struct.unpack(">hhhhhh", bytearray(data))
 
-        self.bank(2)
 
         # Read accelerometer full scale range and
         # use it to compensate the self.reading to gs
@@ -262,7 +308,6 @@ class icm20948():
         rate : sample rate
                単位はHz
         """
-        self.bank(2)
         # 125Hz - 1.125 kHz / (1 + rate)
         rate = int((1125.0 / rate) - 1)
         # TODO maybe use struct to pack and then write_bytes
@@ -273,10 +318,17 @@ class icm20948():
         """
         加速度の上限を+-指定された値にする。
         set the accelerometer fulls cale range to +- the supplied value.
+        Parameters
+        -------
+        scale : 2, 4, 8, 16 g
+                上記以外の値を指定した場合16 gとなる。
         """
-        self.bank(2)
         value = self.read(register.ICM20948_ACCEL_CONFIG) & 0b11111001
-        value |= {2: 0b00, 4: 0b01, 8: 0b10, 16: 0b11}[scale] << 1
+        dic = {2: 0b00, 4: 0b01, 8: 0b10, 16: 0b11}
+        if scale in dic:
+            value |= dic[scale] << 1
+        else:            
+            value |= dic[16] << 1
         self.write(register.ICM20948_ACCEL_CONFIG, value)
 
     def set_accelerometer_low_pass(self, enabled=True, mode=5):
@@ -286,9 +338,8 @@ class icm20948():
         -------
         enable : low pass filter を使うかどうか。
         mode : モード指定。
-               詳しくはデータシートを参照。
+               詳しくはデータシートTable 18.を参照。
         """
-        self.bank(2)
         value = self.read(register.ICM20948_ACCEL_CONFIG) & 0b10001110
         if enabled:
             value |= 0b1
@@ -303,7 +354,6 @@ class icm20948():
         rate : sample rate
                
         """
-        self.bank(2)
         # 100Hz sample rate - 1.1 kHz / (1 + rate)
         rate = int((1100.0 / rate) - 1)
         self.write(register.ICM20948_GYRO_SMPLRT_DIV, rate)
@@ -312,10 +362,16 @@ class icm20948():
         """
         gyroの上限を+-指定された値にする。
         Set the gyro full scale range to +- supplied value.
+        Parameters
+        -------
+        scale : 250, 500, 1000, 2000 degree/sec
         """
-        self.bank(2)
         value = self.read(register.ICM20948_GYRO_CONFIG_1) & 0b11111001
-        value |= {250: 0b00, 500: 0b01, 1000: 0b10, 2000: 0b11}[scale] << 1
+        dic = {250: 00, 500: 0b01, 1000: 0b10, 2000: 0b11}
+        if scale in dic:
+            value |= dic[scale] << 1
+        else:            
+            value |= dic[250] << 1
         self.write(register.ICM20948_GYRO_CONFIG_1, value)
 
     def set_gyro_low_pass(self, enabled=True, mode=5):
@@ -327,48 +383,148 @@ class icm20948():
         mode : モード指定。
                詳しくはデータシートを参照。
         """
-        self.bank(2)
         value = self.read(register.ICM20948_GYRO_CONFIG_1) & 0b10001110
         if enabled:
             value |= 0b1
         value |= (mode & 0x07) << 4
         self.write(register.ICM20948_GYRO_CONFIG_1, value)
 
-    def __init__(self, handler, i2c_addr=register.I2C_ADDR):
+    def set_accelerometer_enabled(self, enabled=True, lowpower=False):
+        """
+        加速度計の有効/無効を切り替える
+        Parameters
+        -------
+        enabled : bool
+            有効/無効
+        lowpower : bool
+            低電力モードの有効/無効
+        """
+        try:
+            if enabled:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_2, 0b00111000, 3, 0b0)
+                self.accelerometer = True
+            else:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_2, 0b00111000, 3, 0b111)
+                self.accelerometer = False
+
+            if lowpower:
+                self._writeByteBitfield(register.ICM20948_LP_CONFIG, 0b00100000, 5, 0b1)
+                self.accelerometer_lowpower = True
+            else:
+                self._writeByteBitfield(register.ICM20948_LP_CONFIG, 0b00100000, 5, 0b0)
+                self.accelerometer_lowpower = False
+            self.set_lowpower()
+        except:
+            raise ICM_FAILED_SETUP
+
+
+    def set_gyro_enabled(self, enabled=True, lowpower=False):
+        """
+        ジャイロの有効/無効を切り替える
+        Parameters
+        -------
+        enabled : bool
+            有効/無効
+        lowpower : bool
+            低電力モードの有効/無効
+        """
+        try:
+            if enabled:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_2, 0b00000111, 0, 0b0)
+                self.gyro = True
+            else:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_2, 0b00000111, 0, 0b111)
+                self.gyro = False
+
+            if lowpower:
+                self._writeByteBitfield(register.ICM20948_LP_CONFIG, 0b00010000, 4, 0b1)
+                self.gyro_lowpower = True
+            else:
+                self._writeByteBitfield(register.ICM20948_LP_CONFIG, 0b00010000, 4, 0b0)
+                self.gyro_lowpower = False
+            self.set_lowpower()
+        except:
+            raise ICM_FAILED_SETUP
+
+    def set_device_awake(self, awake=True):
+        """
+        スリープモードを切り替える。
+        Parameters
+        -------
+        awake : bool
+        """
+        try:
+            if awake:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b01000000, 6, 0b0)
+                self.sleep = False
+            else:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b01000000, 6, 0b1)
+                self.sleep = True
+        except:
+            raise ICM_FAILED_SETUP
+
+    def set_lowpower(self):
+        """
+        加速度計、ジャイロ、地磁気のいずれかが低電力モードのとき、回路部を低電力モードにする。
+        """
+        try:
+            if self.accelerometer_lowpower or self.gyro_lowpower:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b1)
+                self.circuit_lowpower = False
+            else:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b0)
+                self.circuit_lowpower = True
+        except:
+            raise ICM_FAILED_SETUP
+
+    def reset_device(self):
+        try:
+            self.write(register.ICM20948_PWR_MGMT_1, 0x80)
+        except:
+            raise ICM_FAILED_SETUP
+
+    def __init__(self, handler, i2c_addr=constant.I2C_ADDR):
         self._bank = -1
         self._addr = i2c_addr
+
+        self.sleep = False
+        self.accelerometer = True
+        self.gyro = True 
+        self.accelerometer_lowpower = False
+        self.gyro_lowpower = False
+        self.circuit_lowpower = False
 
         try:
             self._bus = i2c_bus(handler, self._addr)
         except:
             raise ICM_FAILED_INIT
-        else:
-            pass
 
-        self.bank(0)
-        if not self.read(register.ICM20948_WHO_AM_I) == register.CHIP_ID:
+        if not self.read(register.ICM20948_WHO_AM_I) == constant.CHIP_ID:
             raise ICM_FAILED_SETUP
 
-        self.write(register.ICM20948_PWR_MGMT_1, 0x01)
-        self.write(register.ICM20948_PWR_MGMT_2, 0x00)
+        try:
+            self.reset_device()
+            self.write(register.ICM20948_PWR_MGMT_1, 0x01) # clock select
 
-        self.bank(2)
+            self.set_device_awake()
+            self.set_accelerometer_enabled()
+            self.set_gyro_enabled()
 
-        self.set_gyro_sample_rate(100)
-        self.set_gyro_low_pass(enabled=True, mode=5)
-        self.set_gyro_full_scale(250)
+            self.set_gyro_sample_rate(100)
+            self.set_gyro_low_pass(enabled=True, mode=5)
+            self.set_gyro_full_scale(250)
 
-        self.set_accelerometer_sample_rate(125)
-        self.set_accelerometer_low_pass(enabled=True, mode=5)
-        self.set_accelerometer_full_scale(16)
+            self.set_accelerometer_sample_rate(125)
+            self.set_accelerometer_low_pass(enabled=True, mode=5)
+            self.set_accelerometer_full_scale(8)
 
-        self.bank(0)
-        self.write(register.ICM20948_INT_PIN_CFG, 0x30)
-        self.write(register.ICM20948_USER_CTRL, 0x20)
+            self.write(register.ICM20948_INT_PIN_CFG, 0x30)
+            self.write(register.ICM20948_USER_CTRL, 0x20)
 
-        self.bank(3)
-        self.write(register.ICM20948_I2C_MST_CTRL, 0x4D)
-        self.write(register.ICM20948_I2C_MST_DELAY_CTRL, 0x01)
+            self.write(register.ICM20948_I2C_MST_CTRL, 0x4D)
+            self.write(register.ICM20948_I2C_MST_DELAY_CTRL, 0x01)
+        except:
+            raise ICM_FAILED_SETUP    
 
         if not self.mag_read(register.AK09916_WIA) == register.AK09916_CHIP_ID:
             raise ICM_FAILED_SETUP
