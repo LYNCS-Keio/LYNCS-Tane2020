@@ -175,7 +175,7 @@ class i2c_bus():
         else:
             return val
 
-    def writeByte(self, reg, data):
+    def writeByte(self, reg, data, no_check=False):
         """
         1Byte書き込む。
         
@@ -185,17 +185,28 @@ class i2c_bus():
             書き込むレジスタのアドレス。
         data : int
             書き込むデータ。
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """
         try:
             self._handler.i2c_write_byte_data(self._bus, reg, data)
-            if self.readByte(reg) != data:
-                raise I2C_FAILED_WRITING
+            if no_check == False:
+                stat = self.readByte(reg)
+                if stat != data:
+                    #print("checkfailed", stat, data)
+                    raise I2C_FAILED_WRITING
+                else:
+                    #print("checkpassed", bin(data), hex(reg))
+                    pass
+            else:
+                #print("check skipped")
+                pass
         except:
             raise I2C_FAILED_WRITING
         else:
             return 0
 
-    def writeByteBitfield(self, reg, mask, shift, data):
+    def writeByteBitfield(self, reg, mask, shift, data, no_check=False):
         """
         レジスタの一部だけに書き込む。
 
@@ -209,6 +220,8 @@ class i2c_bus():
             マスクしたデータのビットシフト数。
         data : int
             書き込むデータ。
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """        
         try:
             old = self.readByte(reg)
@@ -217,7 +230,7 @@ class i2c_bus():
         else:
             try:
                 buf = (old & ~mask) | (data << shift) & mask
-                self.writeByte(reg, buf)
+                self.writeByte(reg, buf, no_check)
             except I2C_FAILED_WRITING:
                 raise I2C_FAILED_WRITING
             else:
@@ -239,7 +252,7 @@ class i2c_bus():
         except:
             raise I2C_FAILED_WRITING
 
-    def writeWord(self, reg, data):
+    def writeWord(self, reg, data, no_check=False):
         """
         1Word書き込む。
 
@@ -249,17 +262,20 @@ class i2c_bus():
             書き込むレジスタのアドレス。
         data : int
             書き込むデータ。
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """
         try:
             self._handler.i2c_write_word_data(self._bus, reg, data)
-            if self.readWord(reg) != data:
-                raise I2C_FAILED_WRITING
+            if no_check == False:
+                if self.readWord(reg) != data:
+                    raise I2C_FAILED_WRITING
         except:
             raise I2C_FAILED_WRITING
         else:
             return 0
 
-    def writeWordBitfield(self, reg, mask, shift, data):
+    def writeWordBitfield(self, reg, mask, shift, data, no_check=False):
         """
         レジスタの一部だけに書き込む。
 
@@ -273,6 +289,8 @@ class i2c_bus():
             マスクしたデータのビットシフト数。
         data : int
             書き込むデータ。
+        no_check : bool
+            Trueの場合書き込み後の確認を行わない。
         """
         try:
             old = self.readWord(reg)
@@ -280,7 +298,8 @@ class i2c_bus():
             raise I2C_FAILED_READING
         else:
             try:
-                self.writeWord(reg, (old & ~mask) | (data << shift) & mask)
+                buf = (old & ~mask) | (data << shift) & mask
+                self.writeWord(reg, buf, no_check)
             except I2C_FAILED_WRITING:
                 raise I2C_FAILED_WRITING
             else:
