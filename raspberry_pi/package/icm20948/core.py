@@ -73,7 +73,7 @@ class ICM_FAILED(_ICM_ERROR):
     "Something went wrong on icm20948"
 
 class ICM_FAILED_INIT(_ICM_ERROR):
-    "Failed initializing  icm20948"
+    "Failed initializing icm20948"
 
 class ICM_FAILED_SETUP(_ICM_ERROR):
     "Failed setting up icm20948"
@@ -83,6 +83,12 @@ class ICM_FAILED_READING(_ICM_ERROR):
 
 class ICM_FAILED_WRITING(_ICM_ERROR):
     "Failed writing data on the icm20948"
+
+class AK09916_FAILED_INIT(_ICM_ERROR):
+    "Failed initializing AK09916"
+
+class AK09916_FAILED_SETUP(_ICM_ERROR):
+    "Failed setting up AK09916"
 
 class icm20948():
     def write(self, reg, value, no_check=False):
@@ -244,26 +250,29 @@ class icm20948():
         z : z軸の地磁気
             単位はμﾃｽﾗ
         """
-        self.mag_write(register.AK09916_CNTL2, 0x01)  # Trigger single measurement
-        while not self.magnetometer_ready():
-            time.sleep(0.00001)
+        if self.sleep == True:
+            return 0, 0, 0
+        else:
+            self.mag_write(register.AK09916_CNTL2, 0x01)  # Trigger single measurement
+            while not self.magnetometer_ready():
+                time.sleep(0.00001)
 
-        data = self.mag_read_bytes(register.AK09916_HXL, 6)
+            data = self.mag_read_bytes(register.AK09916_HXL, 6)
 
-        # Read ST2 to confirm self.read finished,
-        # needed for continuous modes
-        # self.mag_read(AK09916_ST2)
+            # Read ST2 to confirm self.read finished,
+            # needed for continuous modes
+            # self.mag_read(AK09916_ST2)
 
-        x, y, z = struct.unpack("<hhh", bytearray(data))
+            x, y, z = struct.unpack("<hhh", bytearray(data))
 
-        # Scale for magnetic flux density "uT"
-        # from section 3.3 of the datasheet
-        # This value is constant
-        x *= 0.15
-        y *= 0.15
-        z *= 0.15
+            # Scale for magnetic flux density "uT"
+            # from section 3.3 of the datasheet
+            # This value is constant
+            x *= 0.15
+            y *= 0.15
+            z *= 0.15
 
-        return x, y, z
+            return x, y, z
 
     def read_accelerometer_data(self):
         """
@@ -274,7 +283,7 @@ class icm20948():
         list of float : 次の順に並んでいる。
         ax, ay, az : 各軸の加速度 
         """
-        if self.accelerometer == False:
+        if (self.accelerometer == False) or (self.sleep == True):
             return 0, 0, 0
         else:
             data = self.read_bytes(register.ICM20948_ACCEL_XOUT_H, 6)
@@ -303,7 +312,7 @@ class icm20948():
         list of float : 次の順に並んでいる。
         gx, gy, gz : 各軸の重力加速度
         """
-        if self.gyro == False:
+        if (self.gyro == False) or (self.sleep == True):
             return 0, 0, 0
         else:
             data = self.read_bytes(register.ICM20948_GYRO_XOUT_H, 6)
@@ -470,20 +479,20 @@ class icm20948():
         except:
             raise ICM_FAILED_SETUP
 
-    def set_device_awake(self, awake=True):
+    def set_device_sleep(self, sleep=False):
         """
         スリープモードを切り替える。
         Parameters
         -------
-        awake : bool
+        sleep : bool
         """
         try:
-            if awake:
-                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b01000000, 6, 0b0)
-                self.sleep = False
-            else:
+            if sleep:
                 self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b01000000, 6, 0b1)
                 self.sleep = True
+            else:
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b01000000, 6, 0b0)
+                self.sleep = False
         except:
             raise ICM_FAILED_SETUP
 
@@ -493,13 +502,9 @@ class icm20948():
         """
         try:
             if self.accelerometer_lowpower or self.gyro_lowpower:
-                if self.circuit_lowpower == False:
-                    self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b1)
-                    self.circuit_lowpower = True
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b1)
             else:
-                if self.circuit_lowpower == True:
-                    self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b0)
-                    self.circuit_lowpower = False
+                self._writeByteBitfield(register.ICM20948_PWR_MGMT_1, 0b00100000, 5, 0b0)
         except:
             raise ICM_FAILED_SETUP
 
@@ -518,7 +523,6 @@ class icm20948():
         self.gyro = True 
         self.accelerometer_lowpower = False
         self.gyro_lowpower = False
-        self.circuit_lowpower = False
 
         try:
             self._bus = i2c_bus(handler, self._addr)
@@ -533,7 +537,7 @@ class icm20948():
             time.sleep(0.05)
             self.write(register.ICM20948_PWR_MGMT_1, 0x01) # clock select
 
-            self.set_device_awake()
+            self.set_device_sleep()
             self.set_accelerometer_enabled()
             self.set_gyro_enabled()
 
@@ -553,8 +557,16 @@ class icm20948():
         except:
             raise ICM_FAILED_SETUP    
 
-        if not self.mag_read(register.AK09916_WIA) == register.AK09916_CHIP_ID:
-            raise ICM_FAILED_SETUP
+        i = 0
+        while True:
+            if self.mag_read(register.AK09916_WIA) == register.AK09916_CHIP_ID:
+                break
+            else:
+                self._writeByteBitfield(register.ICM20948_USER_CTRL, 0b10, 1, 1)
+                time.sleep(0.01)
+                i += 1
+                if i >= 50:
+                    raise AK09916_FAILED_INIT
 
         # Reset the magnetometer
         self.mag_write(register.AK09916_CNTL3, 0x01)
@@ -578,4 +590,3 @@ Mag:   {:05.2f} {:05.2f} {:05.2f}""".format(
             ax, ay, az, gx, gy, gz, x, y, z
         ))
 
-        time.sleep(0.25)
