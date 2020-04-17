@@ -1,11 +1,11 @@
 # Fdb version 3
-["dvipdf"] 1587118146 "out/main.dvi" "out/main.pdf" "out/main" 1587118146
-  "out/main.dvi" 1587118146 1336 2b2f5485aefc5fd5f4a16995e0fd2740 "latex"
+["dvipdf"] 1587127667 "out/main.dvi" "out/main.pdf" "out/main" 1587127770
+  "out/main.dvi" 1587127667 1320 334d4719f5e03831b68dcec0779bf536 "latex"
   (generated)
   "out/main.pdf"
-["latex"] 1587118146 "/home/sasa3/LYNCS-Tane2020/doc/main.tex" "out/main.dvi" "main" 1587118146
+["latex"] 1587127667 "/home/sasa3/LYNCS-Tane2020/doc/main.tex" "out/main.dvi" "main" 1587127770
   "/etc/texmf/web2c/texmf.cnf" 1587115202 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/sasa3/LYNCS-Tane2020/doc/main.tex" 1587118143 922 1518a25c9036c0b7bacd64653a73ef28 ""
+  "/home/sasa3/LYNCS-Tane2020/doc/main.tex" 1587127770 843 9f0cc3816c53693a156150486cbebd82 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1511824771 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy6.tfm" 1246382020 1124 14ccf5552bc7f77ca02a8a402bea8bfb ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmbsy8.tfm" 1246382020 1120 200be8b775682cdf80acad4be5ef57e4 ""
@@ -31,6 +31,7 @@
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr6.tfm" 1136768653 1300 b62933e007d01cfd073f79b963c01526 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr8.tfm" 1136768653 1292 21c1c5bfeaebccffdb478fd231a0997d ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmss12.tfm" 1136768653 1324 37b971caf729d7edd9cbb9f9b0ea76eb ""
+  "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmss17.tfm" 1136768653 1320 ed93d62c5f2c16343826001f03341dbc ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy10.tfm" 1136768653 1124 6c73e740cf17375f03eec0ee63599741 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy6.tfm" 1136768653 1116 933a60c408fc0a863a92debe84b2d294 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsy8.tfm" 1136768653 1120 8b7d695260f3cff42e636090a8002094 ""
@@ -58,9 +59,12 @@
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1562720991 35073 2a40cfca74fcd5e2568b569ccaadf3f1 ""
   "/usr/share/texmf/web2c/texmf.cnf" 1562720991 35073 2a40cfca74fcd5e2568b569ccaadf3f1 ""
   "/var/lib/texmf/web2c/euptex/uplatex.fmt" 1587116240 4526377 d16edaebc88a7ca341953869ab7233a3 ""
-  "main.tex" 1587118143 922 1518a25c9036c0b7bacd64653a73ef28 ""
-  "out/main.aux" 1587118146 8 a94a2480d3289e625eea47cd1b285758 "latex"
+  "electric.tex" 1587127618 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "frame.tex" 1587127539 92 c6a884950de40bb58a493f6b85a86057 ""
+  "main.tex" 1587127770 843 9f0cc3816c53693a156150486cbebd82 ""
+  "out/main.aux" 1587127667 8 a94a2480d3289e625eea47cd1b285758 "latex"
+  "program.tex" 1587127662 0 d41d8cd98f00b204e9800998ecf8427e ""
   (generated)
-  "out/main.dvi"
   "out/main.aux"
   "out/main.log"
+  "out/main.dvi"
