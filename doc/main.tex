@@ -1,4 +1,4 @@
-\documentclass[uplatex,a4j,11pt,twocolumn]{jsarticle}
+\documentclass[uplatex,a4j,11pt]{jsarticle}
 
 
 % 数式
@@ -7,25 +7,25 @@
 % 画像
 \usepackage[dvipdfmx]{graphicx}
 
+\usepackage{multicol}
+
 \begin{document}
 
 \title{種子島ロケットコンテスト参加報告}
 \author{宇宙科学総合研究会 LYNCS 佐々木良輔}
 \date{\today}
 
-\columnseprule=0.1mm
-\twocolumn[
+%\columnseprule=0.1mm
 \maketitle
 \begin{abstract}
   2020年度の種子島ロケットコンテストは1年生のみ6人のチームで参加予定だった.
   本イベントに向けて第15回能代宇宙イベントに参加した機体の改良版を製作したが,
   COVID-19の感染拡大を受け大会が中止となったため,ここでは前回の機体からの改良点などを主に書きたいと思う.
 \end{abstract}
-\vspace{10mm}
-]
+\begin{multicols}{2}
 \input{frame.tex}
 \input{electric.tex}
 \input{program.tex}
-
+\end{multicols}
 
 \end{document}

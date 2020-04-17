@@ -105,3 +105,9 @@ venv.bak/
 
 # vscode
 .vscode/
+
+# latex中間ファイル
+*.aux
+*.dvi
+*.fdb_latexmk
+*.fls
