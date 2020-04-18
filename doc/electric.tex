@@ -13,16 +13,14 @@ TWE-LITEを搭載したことで地上へのテレメトリ送信や,遠隔操�
 電源監視ICを搭載したことで,電池残量や消費電力をリアルタイム監視が可能になり,バッテリーの交換タイミングを把握できる.
 また,バッテリーからの電流を直接ドライブするMOSFETを搭載し,これはパラシュート分離機構に用いられている.
 \mfig[width=7cm]{electric/block.jpg}{ブロック図}
-\vfill\null
 \section{実装}
-図\ref{fig:electric/elec1.jpg}は実際に製作した回路である.すべての部品はSMDで実装されており,高密度な電装を実現した.
+図\ref{fig:electric/elec1.jpg}は実際に製作した回路である.すべての部品はSMDで実装されており,高密度かつ耐衝撃性の高い電装を目指した.
 \mfig[width=5cm]{electric/elec1.jpg}{実際の電装}
 \section{問題点}
 実際に製作するとGNSSを受信しないという問題が発生した.他の部品と切り分けて受信実験などをした結果,原因として
 raspberry pi zeroのクロック(1\si{\GHz})とGNSS受信波(1.1-1.5\si{\GHz})が干渉している可能性が疑われた.
 対策として図\ref{fig:electric/elec3.jpg},図\ref{fig:electric/elec2.jpg}のような銅テープによる高周波シールド,スペーサーによるraspberry pi zeroと基板の遠隔化の両方を行ったところ正常に受信した.
 \mfig[width=7cm]{electric/elec3.jpg}{高周波シールド}
-\columnbreak
 \mfig[width=7cm]{electric/elec2.jpg}{スペーサー}
 
 しかし,スペーサーを入れると基板の全高が高くなるため,スペーサーなしで正常に受信ができるように改良する必要がある.
