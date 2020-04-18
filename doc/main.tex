@@ -8,6 +8,19 @@
 \usepackage[dvipdfmx]{graphicx}
 
 \usepackage{multicol}
+\usepackage{siunitx}
+
+\makeatletter
+\def\fgcaption{\def\@captype{figure}\caption}
+\makeatother
+\newcommand{\mfig}[3][width=15cm]{
+\begin{center}
+    \includegraphics[#1]{#2}
+\fgcaption{#3 \label{fig:#2}}
+\end{center}
+}
+%https://blog.kassyi.com/2012/10/latex-multicols-figtuer-and-caption.html
+%画像挿入方法は上記リンクを参照
 
 \begin{document}
 
